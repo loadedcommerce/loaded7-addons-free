@@ -50,13 +50,6 @@ class lC_Payment_cresecure extends lC_Payment {
   */ 
   protected $_allowed_types;  
  /**
-  * The order id
-  *
-  * @var integer
-  * @access protected
-  */ 
-  protected $_order_id;
- /**
   * The completed order status ID
   *
   * @var integer
@@ -105,9 +98,9 @@ class lC_Payment_cresecure extends lC_Payment {
     if (is_object($order)) $this->update_status();
     
     if (defined('ADDONS_PAYMENT_CRE_SECURE_PAYMENTS_TEST_MODE') && ADDONS_PAYMENT_CRE_SECURE_PAYMENTS_TEST_MODE == '1') {
-      $this->iframe_action_url = 'https://sandbox-cresecure.net/securepayments/a1/cc_collection.php?' . $this->_iframe_params();  // sandbox url
+      $this->iframe_action_url = 'https://sandbox-cresecure.net/securepayments/a1/cc_collection.php?';  // sandbox url
     } else {
-      $this->iframe_action_url = 'https://cresecure.net/securepayments/a1/cc_collection.php?' . $this->_iframe_params();  // production url
+      $this->iframe_action_url = 'https://cresecure.net/securepayments/a1/cc_collection.php?';  // production url
     } 
     $this->iframe_params = $this->_getIframeParams(); 
     $this->form_action_url = (getenv('HTTPS') == 'on') ? lc_href_link(FILENAME_CHECKOUT, 'payment_template', 'SSL', true, true, true) : null;
@@ -192,12 +185,7 @@ class lC_Payment_cresecure extends lC_Payment {
   * @return integer
   */ 
   public function confirmation() {
-    $_SESSION['cartSync']['paymentMethod'] = $this->_code;
-    $this->_order_id = lC_Order::insert();
-    // store the cartID info to match up on the return - to prevent multiple order IDs being created
-    $_SESSION['cartSync']['cartID'] = $_SESSION['cartID'];
-    $_SESSION['cartSync']['prepOrderID'] = $_SESSION['prepOrderID'];  
-    $_SESSION['cartSync']['orderCreated'] = TRUE;    
+    return false;   
   }
  /**
   * Return the confirmation button logic
@@ -206,7 +194,14 @@ class lC_Payment_cresecure extends lC_Payment {
   * @return string
   */ 
   public function process_button() {
-    return false;
+    $_SESSION['cartSync']['paymentMethod'] = $this->_code;
+    $order_id = lC_Order::insert();
+    
+    // store the cartID info to match up on the return - to prevent multiple order IDs being created
+    $_SESSION['cartSync']['iFrameParams'] = $this->_iframe_params($order_id);
+    $_SESSION['cartSync']['cartID'] = $_SESSION['cartID'];
+    $_SESSION['cartSync']['prepOrderID'] = $_SESSION['prepOrderID'];  
+    $_SESSION['cartSync']['orderCreated'] = TRUE; 
   }
  /**
   * Parse the response from the processor
@@ -314,7 +309,7 @@ class lC_Payment_cresecure extends lC_Payment {
   * @access public
   * @return string
   */ 
-  private function _iframe_params() {
+  private function _iframe_params($order_id) {
     global $lC_Language, $lC_ShoppingCart, $lC_Currencies, $lC_Customer; 
     
     if (defined('ADDONS_PAYMENT_CRE_SECURE_PAYMENTS_TEST_MODE') && ADDONS_PAYMENT_CRE_SECURE_PAYMENTS_TEST_MODE == '1') {
@@ -326,7 +321,7 @@ class lC_Payment_cresecure extends lC_Payment {
     $uid_action_params = array('CRESecureID' => ADDONS_PAYMENT_CRE_SECURE_PAYMENTS_LOGIN, 
                                'CRESecureAPIToken' => ADDONS_PAYMENT_CRE_SECURE_PAYMENTS_API_TOKEN,
                                'total_amt' => $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()),
-                               'order_id' => $this->_order_id,
+                               'order_id' => $order_id,
                                'customer_id' => $lC_Customer->getID(),
                                'currency_code' => $_SESSION['currency'],
                                'lang' => $lC_Language->getCode(),
