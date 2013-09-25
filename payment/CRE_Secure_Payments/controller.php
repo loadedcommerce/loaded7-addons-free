@@ -94,7 +94,7 @@ class CRE_Secure_Payments extends lC_Addon { // your addon must extend lC_Addon
     
     $lC_Database->simpleQuery("ALTER TABLE " . TABLE_ORDERS . " CHANGE payment_method payment_method VARCHAR( 512 ) NOT NULL");
     
-    // on linux systems, set the permissions of the tempalte file to 755
+    // on linux systems, set the permissions of the template file to 755
     if (DIRECTORY_SEPARATOR == '/') {
       exec('\chmod 755 ' . DIR_FS_CATALOG . 'addons/' . $this->_code . '/cresecure_template.php');
     }
