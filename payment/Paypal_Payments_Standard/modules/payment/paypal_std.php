@@ -241,6 +241,7 @@ class lC_Payment_paypal_std extends lC_Payment {
 
     $paypal_standard_params = array(
         'cmd' => '_ext-enter', 
+        'bn' => 'LoadedCommerce_Cart',
         'business' => ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_BUSINESS_ID,       
         'currency_code' => $_SESSION['currency'],
         'return' => $return_href_link,
