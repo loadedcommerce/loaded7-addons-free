@@ -93,6 +93,11 @@ class Loaded_Payments extends lC_Addon { // your addon must extend lC_Addon
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort Order', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0' , now())");
     
     $lC_Database->simpleQuery("ALTER TABLE " . TABLE_ORDERS . " CHANGE payment_method payment_method VARCHAR( 512 ) NOT NULL");
+    
+    // on linux systems, set the permissions of the template file to 755
+    if (DIRECTORY_SEPARATOR == '/') {
+      exec('\chmod 755 ' . DIR_FS_CATALOG . 'addons/' . $this->_code . '/loadedpayments.css');
+    }    
   }
  /**
   * Return the configuration parameter keys an an array

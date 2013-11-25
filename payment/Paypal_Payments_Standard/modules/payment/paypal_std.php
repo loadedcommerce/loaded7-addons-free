@@ -124,7 +124,7 @@ class lC_Payment_paypal_std extends lC_Payment {
     global $lC_Language;
 
     $selection = array('id' => $this->_code,
-                       'module' => '<div class="payment-selection">' . $lC_Language->get('payment_paypal_std_method_title') . '<span>' . lc_image('images/payment/paypal-cards.png', null, null, null, 'style="vertical-align:middle;"') . '</span></div><div class="payment-selection-title">' . $lC_Language->get('payment_paypal_std_method_blurb') . '</div>');    
+                       'module' => '<div class="payment-selection">' . $lC_Language->get('payment_paypal_std_method_title') . '<span style="margin-left:6px;">' . lc_image('addons/Paypal_Payments_Standard/images/paypal-cards.png', null, null, null, 'style="vertical-align:middle;"') . '</span></div><div class="payment-selection-title">' . $lC_Language->get('payment_paypal_std_method_blurb') . '</div>');    
     
     return $selection;
   }
@@ -241,6 +241,7 @@ class lC_Payment_paypal_std extends lC_Payment {
 
     $paypal_standard_params = array(
         'cmd' => '_ext-enter', 
+        'bn' => 'LoadedCommerce_Cart',
         'business' => ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_BUSINESS_ID,       
         'currency_code' => $_SESSION['currency'],
         'return' => $return_href_link,
