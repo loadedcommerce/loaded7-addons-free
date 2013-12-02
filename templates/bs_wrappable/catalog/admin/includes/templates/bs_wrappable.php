@@ -17,6 +17,9 @@ class lC_Template_bs_wrappable {
       $_markup_version = 'HTML 5.0',
       $_css_based = '1', /* 0=No; 1=Yes */
       $_medium = 'Responsive UI',
+      $_screenshot = 'bs_wrappable.png',
+      $_version = '1.0.0',
+      $_compatibility = '7.0',      
       $_groups = array('boxes' => array('left', 'right'),
                        'content' => array('before', 'after')),
       $_keys;
@@ -67,6 +70,18 @@ class lC_Template_bs_wrappable {
   function getGroups($group) {
     return $this->_groups[$group];
   }
+  
+  public function getScreenshot() {
+    return $this->_screenshot;
+  }
+
+  public function getVersion() {
+    return $this->_version;
+  }
+    
+  public function getCompatibility() {
+    return $this->_compatibility;
+  }   
 
   function install() {
     global $lC_Database;
