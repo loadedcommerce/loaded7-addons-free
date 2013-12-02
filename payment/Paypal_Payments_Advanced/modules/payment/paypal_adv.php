@@ -164,7 +164,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
     global $lC_Language;
 
     $selection = array('id' => $this->_code,
-                       'module' => '<div class="payment-selection">' . $lC_Language->get('payment_paypal_adv_method_title') . '<span>' . lc_image('images/payment/paypal-cards.png', null, null, null, 'style="vertical-align:middle;"') . '</span></div><div class="payment-selection-title">' . $lC_Language->get('payment_paypal_adv_method_blurb') . '</div>');    
+                       'module' => '<div class="payment-selection">' . $lC_Language->get('payment_paypal_adv_method_title') . '<span style="margin-left:6px;">' . lc_image('addons/Paypal_Payments_Advanced/images/paypal-cards.png', null, null, null, 'style="vertical-align:middle;"') . '</span></div><div class="payment-selection-title">' . $lC_Language->get('payment_paypal_adv_method_blurb') . '</div>');    
     
     return $selection;
   }
