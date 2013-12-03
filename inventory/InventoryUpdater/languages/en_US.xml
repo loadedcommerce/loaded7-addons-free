@@ -3,7 +3,7 @@
   <definitions>
     <definition>
       <key>addon_catalog_inventoryupdater_title</key>
-      <value><![CDATA[Dropshipper Integration: InventorySource]]></value>
+      <value><![CDATA[Dropshipper Integration]]></value>
       <group>checkout</group>
     </definition>
     <definition>
