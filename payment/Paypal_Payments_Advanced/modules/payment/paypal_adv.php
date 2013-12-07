@@ -11,7 +11,7 @@
   @copyright  (c) 2013 Loaded Commerce Team
   @license    http://loadedcommerce.com/license.html
 */
-require_once(DIR_FS_CATALOG . 'includes/classes/transport.php'); 
+require_once(DIR_FS_CATALOG . 'includes/classes/transport.php');  
 
 class lC_Payment_paypal_adv extends lC_Payment {     
  /**
@@ -42,13 +42,6 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @access protected
   */  
   protected $_sort_order;    
- /**
-  * The order id
-  *
-  * @var integer
-  * @access protected
-  */ 
-  protected $_order_id;
  /**
   * The completed order status ID
   *
@@ -184,12 +177,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @return integer
   */ 
   public function confirmation() {
-    $_SESSION['cartSync']['paymentMethod'] = $this->_code;
-    $this->_order_id = lC_Order::insert($this->order_status);
-    // store the cartID info to match up on the return - to prevent multiple order IDs being created
-    $_SESSION['cartSync']['cartID'] = $_SESSION['cartID'];
-    $_SESSION['cartSync']['prepOrderID'] = $_SESSION['prepOrderID'];  
-    $_SESSION['cartSync']['orderCreated'] = TRUE;  
+    return false;
   }
  /**
   * Return the confirmation button logic
@@ -211,6 +199,15 @@ class lC_Payment_paypal_adv extends lC_Payment {
     if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {                            
       $process_button_string .= lc_draw_hidden_field('MODE', 'TEST');
     }
+    
+    $order_id = lC_Order::insert($this->order_status);    
+
+    $_SESSION['cartSync']['paymentMethod'] = $this->_code;
+    // store the cartID info to match up on the return - to prevent multiple order IDs being created
+    $_SESSION['cartSync']['cartID'] = $_SESSION['cartID'];
+    $_SESSION['cartSync']['prepOrderID'] = $_SESSION['prepOrderID'];     
+    $_SESSION['cartSync']['orderCreated'] = TRUE;
+    $_SESSION['cartSync']['orderID'] = $order_id;     
     
     return $process_button_string;
   }
@@ -248,14 +245,15 @@ class lC_Payment_paypal_adv extends lC_Payment {
        $result = (isset($response['RESULT']) && $response['RESULT'] != NULL) ? $response['RESULT'] : NULL;  
     } else {     
       $result = (isset($_POST['RESULT']) && $_POST['RESULT'] != NULL) ? $_POST['RESULT'] : NULL;
-      if (!isset($this->_order_id) || $this->_order_id == NULL) $this->_order_id = (isset($_POST['INVNUM']) && !empty($_POST['INVNUM'])) ? $_POST['INVNUM'] : $_POST['INVOICE'];
-    }               
+    }   
+    
+    $order_id = (isset($_SESSION['cartSync']['orderID']) && $_SESSION['cartSync']['orderID'] != NULL) ? (int)$_SESSION['cartSync']['orderID'] : 0;            
 
     $error = false;
     switch ($result) {
       case '0' :
         // update order status
-        lC_Order::process($this->_order_id, $this->_order_status_complete);
+        lC_Order::process($order_id, $this->_order_status_complete);
         break;
         
       default :
@@ -271,7 +269,6 @@ class lC_Payment_paypal_adv extends lC_Payment {
 
     if (isset($_SESSION['PPEC_PROCESS']['DATA']) && $_SESSION['PPEC_PROCESS']['DATA'] != NULL) {
       $response_array = array('root' => $_SESSION['PPEC_PROCESS']['DATA']);
-      if (isset($_SESSION['cartSync']['orderID']) && $_SESSION['cartSync']['orderID'] != NULL) $this->_order_id = $_SESSION['cartSync']['orderID'];
     } else {
       $response_array = array('root' => $_POST);
     }
@@ -281,7 +278,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
     
     $Qtransaction = $lC_Database->query('insert into :table_orders_transactions_history (orders_id, transaction_code, transaction_return_value, transaction_return_status, date_added) values (:orders_id, :transaction_code, :transaction_return_value, :transaction_return_status, now())');
     $Qtransaction->bindTable(':table_orders_transactions_history', TABLE_ORDERS_TRANSACTIONS_HISTORY);
-    $Qtransaction->bindInt(':orders_id', $this->_order_id);
+    $Qtransaction->bindInt(':orders_id', $order_id);
     $Qtransaction->bindInt(':transaction_code', 1);
     $Qtransaction->bindValue(':transaction_return_value', $lC_XML->toXML());
     $Qtransaction->bindInt(':transaction_return_status', (strtoupper(trim($this->_transaction_response)) == '0') ? 1 : 0);
@@ -378,7 +375,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
     unset($_SESSION['PPEC_PAYDATA']['TOKEN']);
     unset($_SESSION['PPEC_PAYDATA']['PAYERID']);
     
-    if (!isset($this->_order_id) || $this->_order_id == NULL) $this->_order_id = (isset($_SESSION['prepOrderID']) && $_SESSION['prepOrderID'] != NULL) ? end(explode('-', $_SESSION['prepOrderID'])) : 0;
+  //  if (!isset($this->_order_id) || $this->_order_id == NULL) $this->_order_id = (isset($_SESSION['prepOrderID']) && $_SESSION['prepOrderID'] != NULL) ? end(explode('-', $_SESSION['prepOrderID'])) : 0;
     
     return $response;    
   }  
@@ -590,7 +587,14 @@ class lC_Payment_paypal_adv extends lC_Payment {
     foreach ($lC_ShoppingCart->getOrderTotals() as $ot) {
       if ($ot['code'] == 'shipping') $shippingTotal = (float)$ot['value'];
       if ($ot['code'] == 'tax') $taxTotal = (float)$ot['value'];
-    }         
+    }  
+    
+    $order_id = (isset($_SESSION['cartSync']['orderID']) && $_SESSION['cartSync']['orderID'] != NULL) ? (int)$_SESSION['cartSync']['orderID'] : 0;            
+echo "<pre>";
+print_r($_SESSION['cartSync']);            
+echo "</pre>";
+die('009');
+           
 
     $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE == 'Authorization') ? 'A' : 'S';
     $postData = $this->_getUserParams() .  
@@ -622,7 +626,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
                 "&SHIPTOPHONENUM=" . $lC_Customer->getTelephone() . 
                 "&SHIPTOEMAIL=" . $lC_Customer->getEmailAddress() . 
                 "&CURRENCY=" . $_SESSION['currency'] . 
-                "&INVNUM=" . $this->_order_id . 
+                "&INVNUM=" . $order_id . 
                 "&ADDROVERRIDE=1"; 
                            
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));    
@@ -648,7 +652,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @return array
   */
   private function _getSecureToken() {   
-    global $lC_Language, $lC_ShoppingCart, $lC_Currencies, $lC_Customer, $lC_MessageStack;
+    global $lC_Language, $lC_ShoppingCart, $lC_Currencies, $lC_Customer, $lC_MessageStack, $order_id;
         
     if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {
       $action_url = 'https://pilot-payflowpro.paypal.com';  // sandbox url
@@ -717,7 +721,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
                 "&SHIPTOPHONENUM=" . $lC_Customer->getTelephone() . 
                 "&SHIPTOEMAIL=" . $lC_Customer->getEmailAddress() . 
                 "&CURRENCY=" . $_SESSION['currency'] . 
-                "&INVNUM=" . $this->_order_id . 
+                "&INVNUM=" . $order_id . 
                 "&URLMETHOD=POST" . 
                 "&CSCREQUIRED=TRUE" . 
                 "&CSCEDIT=TRUE" . 

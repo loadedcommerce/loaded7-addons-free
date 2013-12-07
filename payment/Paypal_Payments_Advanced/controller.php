@@ -49,7 +49,7 @@ class Paypal_Payments_Advanced extends lC_Addon { // your addon must extend lC_A
    /**
     * The addon version
     */     
-    $this->_version = '1.0.0';
+    $this->_version = '1.0.1';
    /**
     * The Loaded 7 core compatibility version
     */     
