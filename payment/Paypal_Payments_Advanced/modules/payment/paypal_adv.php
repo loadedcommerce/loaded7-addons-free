@@ -590,10 +590,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
     }  
     
     $order_id = (isset($_SESSION['cartSync']['orderID']) && $_SESSION['cartSync']['orderID'] != NULL) ? (int)$_SESSION['cartSync']['orderID'] : 0;            
-echo "<pre>";
-print_r($_SESSION['cartSync']);            
-echo "</pre>";
-die('009');
+
            
 
     $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE == 'Authorization') ? 'A' : 'S';
@@ -626,7 +623,7 @@ die('009');
                 "&SHIPTOPHONENUM=" . $lC_Customer->getTelephone() . 
                 "&SHIPTOEMAIL=" . $lC_Customer->getEmailAddress() . 
                 "&CURRENCY=" . $_SESSION['currency'] . 
-                "&INVNUM=" . $order_id . 
+              //  "&INVNUM=" . $order_id . 
                 "&ADDROVERRIDE=1"; 
                            
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));    
