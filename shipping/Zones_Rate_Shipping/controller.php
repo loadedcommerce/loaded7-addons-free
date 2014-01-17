@@ -55,7 +55,7 @@ class Zones_Rate_Shipping extends lC_Addon { // your addon must extend lC_Addon
    /**
     * The Loaded 7 core compatibility version
     */     
-    $this->_compatibility = '7.002.0.0'; // the addon is compatible with this core version and later   
+    $this->_compatibility = '7.000.0.0'; // the addon is compatible with this core version and later   
    /**
     * The addon image used in the addons store listing
     */     
