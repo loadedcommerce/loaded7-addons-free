@@ -1,6 +1,6 @@
 <?php
 /**  
-  $Id: paypal_adv.php v1.0 2013-01-01 datazen $
+  $Id: payflow_EC.php v1.0 2013-01-01 datazen $
 
   LoadedCommerce, Innovative eCommerce Solutions
   http://www.loadedcommerce.com
@@ -13,7 +13,7 @@
 */
 require_once(DIR_FS_CATALOG . 'includes/classes/transport.php'); 
 
-class lC_Payment_paypal_adv extends lC_Payment {     
+class lC_Payment_payflow_EC extends lC_Payment {     
  /**
   * The public title of the payment module (admin)
   *
@@ -27,7 +27,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @var string
   * @access protected
   */  
-  protected $_code = 'paypal_adv';
+  protected $_code = 'payflow_EC';
  /**
   * The status of the module
   *
@@ -67,15 +67,15 @@ class lC_Payment_paypal_adv extends lC_Payment {
  /**
   * Constructor
   */      
-  public function lC_Payment_paypal_adv() {
+  public function lC_Payment_payflow_EC() {
     global $lC_Language;
 
-    $this->_title = $lC_Language->get('payment_paypal_adv_title'); // admin listing title
-    $this->_method_title = $lC_Language->get('payment_paypal_adv_method_title'); // public sidebar title 
-    $this->_status = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_STATUS') && (ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_STATUS == '1') ? true : false);
-    $this->_sort_order = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_SORT_ORDER') ? ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_SORT_ORDER : null);
+    $this->_title = $lC_Language->get('payment_payflow_EC_title'); // admin listing title
+    $this->_method_title = $lC_Language->get('payment_payflow_EC_method_title'); // public sidebar title 
+    $this->_status = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_STATUS') && (ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_STATUS == '1') ? true : false);
+    $this->_sort_order = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_SORT_ORDER') ? ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_SORT_ORDER : null);
 
-    if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_STATUS')) {
+    if (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_STATUS')) {
       $this->initialize();
     }
   }
@@ -88,35 +88,35 @@ class lC_Payment_paypal_adv extends lC_Payment {
   public function initialize() {
     global $lC_Database, $lC_Language, $order;
 
-    if ((int)ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_ORDER_STATUS_ID > 0) {
-      $this->order_status = ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_ORDER_STATUS_ID;
+    if ((int)ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_ORDER_STATUS_ID > 0) {
+      $this->order_status = ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_ORDER_STATUS_ID;
     }
     
-    if ((int)ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_ORDER_STATUS_COMPLETE_ID > 0) {
-      $this->_order_status_complete = ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_ORDER_STATUS_COMPLETE_ID;
+    if ((int)ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_ORDER_STATUS_COMPLETE_ID > 0) {
+      $this->_order_status_complete = ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_ORDER_STATUS_COMPLETE_ID;
     }    
 
     if (is_object($order)) $this->update_status();
     
-    if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {
+    if (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEST_MODE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEST_MODE == '1') {
       $this->_ec_redirect_url = 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=';  // sandbox url
-      if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE == 'C') {
+      if (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE == 'C') {
         $this->form_action_url = lc_href_link(FILENAME_CHECKOUT, 'payment_template', 'SSL', true, true, true);  // payment page
         // set the width, height and scroll for the iframe
         $this->iframe_params = $this->_getIframeParams();
-        $this->iframe_action_url = 'https://pilot-payflowlink.paypal.com?SECURETOKEN=' . $_SESSION['cartSync']['SECURETOKEN'] . '&SECURETOKENID=' . $_SESSION['cartSync']['SECURETOKENID'] . '&MODE=TEST';  
+        $this->iframe_action_url = 'https://pilot-payflowpro.paypal.com?SECURETOKEN=' . $_SESSION['cartSync']['SECURETOKEN'] . '&SECURETOKENID=' . $_SESSION['cartSync']['SECURETOKENID'] . '&MODE=TEST';  
       } else {
-        $this->form_action_url = 'https://pilot-payflowlink.paypal.com';  // sandbox url
+        $this->form_action_url = 'https://pilot-payflowpro.paypal.com';  // sandbox url
       }
     } else {
       $this->_ec_redirect_url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=';  // production url
-      if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE == 'C') {
+      if (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE == 'C') {
         $this->form_action_url = lc_href_link(FILENAME_CHECKOUT, 'payment_template', 'SSL', true, true, true);  // payment page
         // set the width, height and scroll for the iframe
         $this->iframe_params = $this->_getIframeParams();
-        $this->iframe_action_url = 'https://payflowlink.paypal.com?SECURETOKEN=' . $_SESSION['cartSync']['SECURETOKEN'] . '&SECURETOKENID=' . $_SESSION['cartSync']['SECURETOKENID'];  
+        $this->iframe_action_url = 'https://payflowpro.paypal.com?SECURETOKEN=' . $_SESSION['cartSync']['SECURETOKEN'] . '&SECURETOKENID=' . $_SESSION['cartSync']['SECURETOKENID'];  
       } else {
-        $this->form_action_url = 'https://payflowlink.paypal.com';  // production url
+        $this->form_action_url = 'https://payflowpro.paypal.com';  // production url
       }      
       
     }
@@ -130,12 +130,12 @@ class lC_Payment_paypal_adv extends lC_Payment {
   public function update_status() {
     global $lC_Database, $order;
 
-    if ( ($this->_status === true) && ((int)ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_ZONE > 0) ) {
+    if ( ($this->_status === true) && ((int)ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_ZONE > 0) ) {
       $check_flag = false;
 
       $Qcheck = $lC_Database->query('select zone_id from :table_zones_to_geo_zones where geo_zone_id = :geo_zone_id and zone_country_id = :zone_country_id order by zone_id');
       $Qcheck->bindTable(':table_zones_to_geo_zones', TABLE_ZONES_TO_GEO_ZONES);
-      $Qcheck->bindInt(':geo_zone_id', ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_ZONE);
+      $Qcheck->bindInt(':geo_zone_id', ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_ZONE);
       $Qcheck->bindInt(':zone_country_id', $order->billing['country']['id']);
       $Qcheck->execute();
 
@@ -164,7 +164,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
     global $lC_Language;
 
     $selection = array('id' => $this->_code,
-                       'module' => '<div class="payment-selection">' . $lC_Language->get('payment_paypal_adv_method_title') . '<span>' . lc_image('images/payment/paypal-cards.png', null, null, null, 'style="vertical-align:middle;"') . '</span></div><div class="payment-selection-title">' . $lC_Language->get('payment_paypal_adv_method_blurb') . '</div>');    
+                       'module' => '<div class="payment-selection">' . $lC_Language->get('payment_payflow_EC_method_title') . '<span>' . lc_image('images/payment/paypal-cards.png', null, null, null, 'style="vertical-align:middle;"') . '</span></div><div class="payment-selection-title">' . $lC_Language->get('payment_payflow_EC_method_blurb') . '</div>');    
     
     return $selection;
   }
@@ -184,9 +184,10 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @return integer
   */ 
   public function confirmation() {
-    global $lC_ShoppingCart;
+    global $lC_Language, $lC_Database, $lC_MessageStack, $lC_ShoppingCart;
 
     $lC_ShoppingCart->setBillingMethod(array('id' => $this->_code, 'title' => $this->_method_title));
+
     $_SESSION['cartSync']['paymentMethod'] = $this->_code;
     $this->_order_id = lC_Order::insert($this->order_status);
     // store the cartID info to match up on the return - to prevent multiple order IDs being created
@@ -203,19 +204,18 @@ class lC_Payment_paypal_adv extends lC_Payment {
   public function process_button() { 
     global $lC_MessageStack;
 
-    $response = $this->_getSecureToken();
+    if(!$_SESSION['PPEC_PAYDATA']) {
+      $_SESSION['PPEC_TOKEN'] = $this->setExpressCheckout(); 
 
-    $process_button_string = lc_draw_hidden_field('SECURETOKEN', $response['SECURETOKEN']) . 
-                             lc_draw_hidden_field('SECURETOKENID', $response['SECURETOKENID']); 
-
-    $_SESSION['cartSync']['SECURETOKEN'] = $response['SECURETOKEN'];                      
-    $_SESSION['cartSync']['SECURETOKENID'] = $response['SECURETOKENID'];
-                         
-    if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {                            
-      $process_button_string .= lc_draw_hidden_field('MODE', 'TEST');
-    }
-    
-    return $process_button_string;
+      if (!$_SESSION['PPEC_TOKEN']) {
+        lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'cart', 'SSL')); 
+      }
+      // insert the order before leaving for paypal
+      $this->confirmation();
+      // redirect to paypal
+      lc_redirect($this->_ec_redirect_url . $_SESSION['PPEC_TOKEN']); 
+    }  
+    return false;
   }
  /**
   * Parse the response from the processor
@@ -305,7 +305,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
   */ 
   public function check() {
     if (!isset($this->_check)) {
-      $this->_check = defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_STATUS');
+      $this->_check = defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_STATUS');
     }
 
     return $this->_check;
@@ -392,10 +392,10 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @return string
   */
   private function _getUserParams() {
-    return "USER=" . ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_USER .
-           "&VENDOR=" . ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_MERCH .
-           "&PARTNER=" . ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_PARTNER .
-           "&PWD=" . ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_PASSWORD;
+    return "USER=" . ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_USER .
+           "&VENDOR=" . ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_MERCH .
+           "&PARTNER=" . ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_PARTNER .
+           "&PWD=" . ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_PASSWORD;
   }
  /**
   * Perform the Express Checkout post process
@@ -463,7 +463,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
         lC_AddressBook::saveEntry($addrArr);
         
       }
-      $lC_ShoppingCart->setBillingMethod(array('id' => 'paypal_adv', 'title' => $GLOBALS['lC_Payment_paypal_adv']->getMethodTitle()));
+      $lC_ShoppingCart->setBillingMethod(array('id' => 'payflow_EC', 'title' => $GLOBALS['lC_Payment_payflow_EC']->getMethodTitle()));
 
       $lC_ShoppingCart->resetBillingAddress();
       $lC_ShoppingCart->resetShippingAddress();
@@ -485,14 +485,14 @@ class lC_Payment_paypal_adv extends lC_Payment {
   private function _doExpressCheckoutPayment($token, $payerID) {
     global $lC_ShoppingCart, $lC_Currencies, $lC_Language, $lC_MessageStack;
      
-    if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {
+    if (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEST_MODE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEST_MODE == '1') {
       $action_url = 'https://pilot-payflowpro.paypal.com';  // sandbox url
     } else {
       $action_url = 'https://payflowpro.paypal.com';  // production url
     }     
 
-    $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE == 'Authorization') ? 'A' : 'S';
-    $returnUrl = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE == 'IFRAME') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
+    $transType = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE == 'Authorization') ? 'A' : 'S';
+    $returnUrl = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE == 'IFRAME') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
 
     $postData = $this->_getUserParams() .  
                 "&TRXTYPE=" . $transType . 
@@ -506,14 +506,14 @@ class lC_Payment_paypal_adv extends lC_Payment {
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));    
   
     if (!$response) { // server failure error
-      $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_paypal_adv_error_server'), 'error');
+      $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_payflow_EC_error_server'), 'error');
       return false;
     }
 
     @parse_str($response, $dataArr);
     
     if ($dataArr['RESULT'] != 0) { // other error
-      $lC_MessageStack->add('shopping_cart', sprintf($lC_Language->get('payment_paypal_adv_error_occurred'), '(' . $dataArr['RESULT'] . ') ' . $dataArr['RESPMSG']), 'error');
+      $lC_MessageStack->add('shopping_cart', sprintf($lC_Language->get('payment_payflow_EC_error_occurred'), '(' . $dataArr['RESULT'] . ') ' . $dataArr['RESPMSG']), 'error');
       return false;
     }  
     
@@ -528,14 +528,14 @@ class lC_Payment_paypal_adv extends lC_Payment {
   private function _getExpressCheckoutDetails($token) {
     global $lC_ShoppingCart, $lC_Currencies, $lC_Language, $lC_MessageStack;
      
-    if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {
+    if (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEST_MODE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEST_MODE == '1') {
       $action_url = 'https://pilot-payflowpro.paypal.com';  // sandbox url
     } else {
       $action_url = 'https://payflowpro.paypal.com';  // production url
     }     
 
-    $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE == 'Authorization') ? 'A' : 'S';
-    $returnUrl = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE == 'IFRAME') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
+    $transType = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE == 'Authorization') ? 'A' : 'S';
+    $returnUrl = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE == 'IFRAME') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
 
     $postData = $this->_getUserParams() .  
                 "&TRXTYPE=" . $transType . 
@@ -546,14 +546,14 @@ class lC_Payment_paypal_adv extends lC_Payment {
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));    
   
     if (!$response) { // server failure error
-      $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_paypal_adv_error_server'), 'error');
+      $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_payflow_EC_error_server'), 'error');
       return false;
     }
 
     @parse_str($response, $dataArr);
     
     if ($dataArr['RESULT'] != 0) { // other error
-      $lC_MessageStack->add('shopping_cart', sprintf($lC_Language->get('payment_paypal_adv_error_occurred'), '(' . $dataArr['RESULT'] . ') ' . $dataArr['RESPMSG']), 'error');
+      $lC_MessageStack->add('shopping_cart', sprintf($lC_Language->get('payment_payflow_EC_error_occurred'), '(' . $dataArr['RESULT'] . ') ' . $dataArr['RESPMSG']), 'error');
       return false;
     }  
     
@@ -569,7 +569,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
     global $lC_ShoppingCart, $lC_Currencies, $lC_Language, $lC_MessageStack, $lC_Customer;
     $lC_Language->load('modules-payment');
      
-    if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {
+    if (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEST_MODE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEST_MODE == '1') {
       $action_url = 'https://pilot-payflowpro.paypal.com';  // sandbox url
     } else {
       $action_url = 'https://payflowpro.paypal.com';  // production url
@@ -581,7 +581,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
     foreach ($lC_ShoppingCart->getProducts() as $products) {
       $itemsString .= '&L_NAME' . (string)$cnt . '=' . $products['name'] .
                       '&L_DESC' . (string)$cnt . '=' . substr($products['description'], 0, 40) .
-                      '&L_SKU' . (string)$cnt . '=' . $products['id'] .
+                      //'&L_SKU' . (string)$cnt . '=' . $products['id'] .
                       '&L_COST' . (string)$cnt . '=' . $products['price'] .
                       '&L_QTY' . (string)$cnt . '=' . $products['quantity'];
       $cnt++;                      
@@ -590,195 +590,52 @@ class lC_Payment_paypal_adv extends lC_Payment {
     // get the shipping amount
     $taxTotal = 0;
     $shippingTotal = 0;
+    $discountTotal = 0;
     foreach ($lC_ShoppingCart->getOrderTotals() as $ot) {
       if ($ot['code'] == 'shipping') $shippingTotal = (float)$ot['value'];
       if ($ot['code'] == 'tax') $taxTotal = (float)$ot['value'];
     }         
 
-    $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE == 'Authorization') ? 'A' : 'S';
+    $transType = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE == 'Authorization') ? 'A' : 'S';
     $postData = $this->_getUserParams() .  
                 "&TRXTYPE=" . $transType . 
                 "&TENDER=P" . 
+                "&USERSELECTEDFUNDINGSOURCE=BML" .
                 "&ACTION=S" . $itemsString .
                 "&AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) .
                 "&RETURNURL=" . lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true) .
                 "&CANCELURL=" . lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true) .                 
                 "&ITEMAMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getSubTotal(), $lC_Currencies->getCode()) . 
                 "&TAXAMT=" . $lC_Currencies->formatRaw($taxTotal, $lC_Currencies->getCode()) . 
-                "&FREIGHTAMT=" . $shippingTotal . 
-                "&BILLTOFIRSTNAME=" . $lC_ShoppingCart->getBillingAddress('firstname') . 
-                "&BILLTOLASTNAME=" . $lC_ShoppingCart->getBillingAddress('lastname') . 
-                "&BILLTOSTREET=" . $lC_ShoppingCart->getBillingAddress('street_address') . 
-                "&BILLTOCITY=" . $lC_ShoppingCart->getBillingAddress('city') . 
-                "&BILLTOSTATE=" . $lC_ShoppingCart->getBillingAddress('zone_code') . 
-                "&BILLTOCOUNTRY=" . $lC_ShoppingCart->getBillingAddress('country_iso_code_2') . 
-                "&BILLTOZIP=" . $lC_ShoppingCart->getBillingAddress('postcode') . 
-                "&BILLTOPHONENUM=" . $lC_Customer->getTelephone() . 
-                "&BILLTOEMAIL=" . $lC_Customer->getEmailAddress() . 
-                "&SHIPTOFIRSTNAME=" . $lC_ShoppingCart->getShippingAddress('firstname') . 
-                "&SHIPTOLASTNAME=" . $lC_ShoppingCart->getShippingAddress('lastname') . 
+                "&FREIGHTAMT=" . $shippingTotal .               
+                "&DISCOUNT=" . $discountTotal .               
+                "&PHONENUM=" . $lC_Customer->getTelephone() . 
+                "&EMAIL=" . $lC_Customer->getEmailAddress() . 
+                "&SHIPTONAME=" . $lC_ShoppingCart->getShippingAddress('firstname') . " " . $lC_ShoppingCart->getShippingAddress('lastname') .
                 "&SHIPTOSTREET=" . $lC_ShoppingCart->getShippingAddress('street_address') . 
                 "&SHIPTOCITY=" . $lC_ShoppingCart->getBillingAddress('city') . 
                 "&SHIPTOSTATE=" . $lC_ShoppingCart->getBillingAddress('zone_code') . 
                 "&SHIPTOCOUNTRY=" . $lC_ShoppingCart->getShippingAddress('country_iso_code_2') . 
                 "&SHIPTOZIP=" . $lC_ShoppingCart->getShippingAddress('postcode') . 
-                "&SHIPTOPHONENUM=" . $lC_Customer->getTelephone() . 
-                "&SHIPTOEMAIL=" . $lC_Customer->getEmailAddress() . 
                 "&CURRENCY=" . $_SESSION['currency'] . 
                 "&INVNUM=" . $this->_order_id . 
-                "&ADDROVERRIDE=1"; 
-                           
+                "&ADDROVERRIDE=1";
+    
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));    
    
     if (!$response) { // server failure error
-      $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_paypal_adv_error_server'), 'error');
+      $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_payflow_EC_error_server'), 'error');
       return false;
     }
 
     @parse_str($response, $dataArr);
-    
+ 
     if ($dataArr['RESULT'] != 0) { // other error  
-      $lC_MessageStack->add('shopping_cart', sprintf($lC_Language->get('payment_paypal_adv_error_occurred'), '(' . $dataArr['RESULT'] . ') ' . $dataArr['RESPMSG']), 'error');
+      $lC_MessageStack->add('shopping_cart', sprintf($lC_Language->get('payment_payflow_EC_error_occurred'), '(' . $dataArr['RESULT'] . ') ' . $dataArr['RESPMSG']), 'error');
       return false;
     }
     
     return $dataArr['TOKEN'];    
-  }
- /**
-  * Send data and receive secure token array
-  *
-  * @access private
-  * @return array
-  */
-  private function _getSecureToken() {   
-    global $lC_Language, $lC_ShoppingCart, $lC_Currencies, $lC_Customer, $lC_MessageStack;
-        
-    if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {
-      $action_url = 'https://pilot-payflowpro.paypal.com';  // sandbox url
-    } else {
-      $action_url = 'https://payflowpro.paypal.com';  // production url
-    }    
-    
-    // build the product description
-    $cnt = 0;
-    $itemsString = '';
-    foreach ($lC_ShoppingCart->getProducts() as $products) {
-      $itemsString .= '&L_NAME' . (string)$cnt . '=' . $products['name'] .
-                      '&L_DESC' . (string)$cnt . '=' . substr($products['description'], 0, 40) .
-                      '&L_SKU' . (string)$cnt . '=' . $products['id'] .
-                      '&L_COST' . (string)$cnt . '=' . $products['price'] .
-                      '&L_QTY' . (string)$cnt . '=' . $products['quantity'];
-      $cnt++;                      
-    }
-    
-    // get the shipping amount
-    $taxTotal = 0;
-    $shippingTotal = 0;
-    foreach ($lC_ShoppingCart->getOrderTotals() as $ot) {
-      if ($ot['code'] == 'shipping') $shippingTotal = (float)$ot['value'];
-      if ($ot['code'] == 'tax') $taxTotal = (float)$ot['value'];
-    }
-
-    $secureTokenId = uniqid('', true); 
-    $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TRXTYPE == 'Authorization') ? 'A' : 'S';
-    $template = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE == 'C') ? 'MINLAYOUT' : ((ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE == 'B') ? 'TEMPLATEB' : 'TEMPLATEA');
-    $returnUrl = (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEMPLATE == 'C') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
-
-    // switch to mofile if iframe and media=mobile
-    $mediaType = (isset($_SESSION['mediaType']) && $_SESSION['mediaType'] != NULL) ? $_SESSION['mediaType'] : 'desktop';
-    if ($template == 'MINLAYOUT' && (stristr($mediaType, 'mobile-') || stristr($mediaType, 'tablet-')) ) $template = 'MOBILE';
-    
-    $postData = $this->_getUserParams() .  
-                "&TRXTYPE=" . $transType . 
-                "&BUTTONSOURCE=LoadedCommerce_Cart" . 
-                "&CREATESECURETOKEN=Y" . 
-                "&SECURETOKENID=" . $secureTokenId . $itemsString .
-                "&ITEMAMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getSubTotal(), $lC_Currencies->getCode()) . 
-                "&TAXAMT=" . $lC_Currencies->formatRaw($taxTotal, $lC_Currencies->getCode()) . 
-                "&FREIGHTAMT=" . $shippingTotal . 
-                "&AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) .
-                "&RETURNURL=" . $returnUrl .
-                "&ERRORURL=" . $returnUrl .
-                "&CANCELURL=" . $returnUrl .
-                "&TEMPLATE=" . $template .
-                "&BILLTOFIRSTNAME=" . $lC_ShoppingCart->getBillingAddress('firstname') . 
-                "&BILLTOLASTNAME=" . $lC_ShoppingCart->getBillingAddress('lastname') . 
-                "&BILLTOSTREET=" . $lC_ShoppingCart->getBillingAddress('street_address') . 
-                "&BILLTOCITY=" . $lC_ShoppingCart->getBillingAddress('city') . 
-                "&BILLTOSTATE=" . $lC_ShoppingCart->getBillingAddress('zone_code') . 
-                "&BILLTOCOUNTRY=" . $lC_ShoppingCart->getBillingAddress('country_iso_code_2') . 
-                "&BILLTOZIP=" . $lC_ShoppingCart->getBillingAddress('postcode') . 
-                "&BILLTOPHONENUM=" . $lC_Customer->getTelephone() . 
-                "&BILLTOEMAIL=" . $lC_Customer->getEmailAddress() . 
-                "&SHIPTOFIRSTNAME=" . $lC_ShoppingCart->getShippingAddress('firstname') . 
-                "&SHIPTOLASTNAME=" . $lC_ShoppingCart->getShippingAddress('lastname') . 
-                "&SHIPTOSTREET=" . $lC_ShoppingCart->getShippingAddress('street_address') . 
-                "&SHIPTOCITY=" . $lC_ShoppingCart->getBillingAddress('city') . 
-                "&SHIPTOSTATE=" . $lC_ShoppingCart->getBillingAddress('zone_code') . 
-                "&SHIPTOCOUNTRY=" . $lC_ShoppingCart->getShippingAddress('country_iso_code_2') . 
-                "&SHIPTOZIP=" . $lC_ShoppingCart->getShippingAddress('postcode') . 
-                "&SHIPTOPHONENUM=" . $lC_Customer->getTelephone() . 
-                "&SHIPTOEMAIL=" . $lC_Customer->getEmailAddress() . 
-                "&CURRENCY=" . $_SESSION['currency'] . 
-                "&INVNUM=" . $this->_order_id . 
-                "&URLMETHOD=POST" . 
-                "&CSCREQUIRED=TRUE" . 
-                "&CSCEDIT=TRUE" . 
-                "&ADDROVERRIDE=1"; 
-                
-    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));
-    
-    if (!$response) {
-      $errmsg = $lC_Language->get('payment_paypal_adv_error_no_response');
-      lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'payment&payment_error=' . $errmsg, 'SSL'));
-    }
-
-    @parse_str($response, $dataArr);
-    
-    if ($dataArr['RESULT'] != 0) { // server failure error
-      $errmsg = sprintf($lC_Language->get('payment_paypal_adv_error_occurred'), '(' . $dataArr['RESULT'] . ') ' . $dataArr['RESPMSG']);
-      lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'payment&payment_error=' . $errmsg, 'SSL'));
-    }    
-    
-    return $dataArr;
-  }
- /**
-  * Determine the iFrame paramters depending on device params
-  *
-  * @access private
-  * @return string
-  */
-  private function _getIframeParams() {
-    // note PayPal has device sensing logic and will redirect to mobile form automatically
-    // Important:  check with actual device.  Emulators will not work when testing.
-    
-    // how many content columns
-    $content_span = (isset($_SESSION['content_span']) && $_SESSION['content_span'] != NULL) ? $_SESSION['content_span'] : '6';
-    
-    switch($content_span) {
-      case '9':
-        $fHeight = '600px';
-        $fScroll = 'no';
-        $fStyle = 'margin-left=36px';
-        $fWidth = '500px';       
-        break;
-        
-      case '12':
-        $fHeight = '600px';
-        $fScroll = 'no';
-        $fStyle = 'margin-left=130px';
-        $fWidth = '500px';       
-        break;
-        
-      default :
-        $fHeight = '600px';
-        $fScroll = 'yes';
-        $fStyle = 'margin-left=-20px';
-        $fWidth = '380px';      
-      
-    }
-    
-    return 'width=' . $fWidth . '&height=' . $fHeight . '&scroll=' . $fScroll . '&' . $fStyle;
-  }
+  }  
 }
 ?>

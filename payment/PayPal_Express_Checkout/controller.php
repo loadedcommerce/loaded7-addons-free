@@ -1,6 +1,6 @@
 <?php
 /*
-  $Id: controller.php v1.0 2013-04-20 datazen $
+  $Id: controller.php v1.0 2013-04-20 gulsarrays $
 
   Loaded Commerce, Innovative eCommerce Solutions
   http://www.loadedcommerce.com
@@ -11,11 +11,11 @@
   @copyright  (c) 2013 LoadedCommerce Team
   @license    http://loadedcommerce.com/license.html
 */
-class Paypal_Payments_Advanced extends lC_Addon { // your addon must extend lC_Addon
+class Paypal_Express_Checkout extends lC_Addon { // your addon must extend lC_Addon
   /*
   * Class constructor
   */
-  public function Paypal_Payments_Advanced() {    
+  public function Paypal_Express_Checkout() {    
     global $lC_Language;    
    /**
     * The addon type (category)
@@ -25,19 +25,15 @@ class Paypal_Payments_Advanced extends lC_Addon { // your addon must extend lC_A
    /**
     * The addon class name
     */    
-    $this->_code = 'Paypal_Payments_Advanced';        
+    $this->_code = 'PayPal_Express_Checkout';        
    /**
     * The addon title used in the addons store listing
     */     
-    $this->_title = $lC_Language->get('addon_payment_paypal_adv_title');
+    $this->_title = $lC_Language->get('addon_payment_paypal_EC_title');
    /**
     * The addon description used in the addons store listing
     */     
-    $this->_description = $lC_Language->get('addon_payment_paypal_adv_description');
-   /**
-    * The addon blurb used in the addons store listing
-    */     
-    $this->_blurb = $lC_Language->get('addon_payment_paypal_adv_blurb');    
+    $this->_description = $lC_Language->get('addon_payment_paypal_EC_description');      
    /**
     * The developers name
     */    
@@ -49,7 +45,7 @@ class Paypal_Payments_Advanced extends lC_Addon { // your addon must extend lC_A
    /**
     * The addon version
     */     
-    $this->_version = '1.0.3';
+    $this->_version = '1.0.0';
    /**
     * The Loaded 7 core compatibility version
     */     
@@ -57,7 +53,7 @@ class Paypal_Payments_Advanced extends lC_Addon { // your addon must extend lC_A
    /**
     * The base64 encoded addon image used in the addons store listing
     */     
-    $this->_thumbnail = lc_image(DIR_WS_CATALOG . 'addons/' . $this->_code . '/images/paypal_adv.png', $this->_title);
+    $this->_thumbnail = lc_image(DIR_WS_CATALOG . 'addons/' . $this->_code . '/images/paypal_express.png', $this->_title);
    /**
     * The mobile capability of the addon
     */ 
@@ -86,14 +82,12 @@ class Paypal_Payments_Advanced extends lC_Addon { // your addon must extend lC_A
     global $lC_Database;
 
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable AddOn', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_STATUS', '-1', 'Do you want to enable this addon?', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Express Checkout', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_EC_STATUS', 'On', 'Show the PayPal Express Checkout shortcut button on the shopping cart page?', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(\'On\', \'Off\'))', now())");
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Partner', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_PARTNER', 'PayPal', 'Enter your PayPal Partner ID.', '6', '0', now())");
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Merchant Login', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_MERCH', '', 'Enter your PayPal Merchant Login.', '6', '0', now())");
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('User', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_USER', '', 'Enter your PayPal User Name.', '6', '0', now())");
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Password', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_PASSWORD', '', 'Enter your PayPal Password.', '6', '0', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('API Username', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_API_USERNAME', '', 'Enter your PayPal EC API Username.', '6', '0', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('API Password', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_API_PASSWORD', '', 'Enter your PayPal EC API Password.', '6', '0', now())");    
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('API Signature', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_API_SIGNATURE', '', 'Enter your PayPal EC API Signature.', '6', '0', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Transaction Type', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TRXTYPE', 'Sale', 'Set the transaction type; Authorization-Only or Sale (Authorize and Capture)', '6', '0', 'lc_cfg_set_boolean_value(array(\'Sale\', \'Authorization\'))', now())");
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Template Layout', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TEMPLATE', 'A', 'Specifies which layout to use for the PayPal checkout page.', '6', '0', 'lc_cfg_set_boolean_value(array(\'A\', \'B\', \'C\'))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Sandbox Mode', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TEST_MODE', '-1', 'Set to \'Yes\' for sandbox test environment or set to \'No\' for production environment.', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Merchant Country', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_MERCHANT_COUNTRY', 'US', 'The country of merchant', '6', '17', 'lc_cfg_set_boolean_value(array(\'US\', \'UK\'))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '2', 'lc_cfg_use_get_zone_class_title', 'lc_cfg_set_zone_classes_pull_down_menu', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Set Pending Status', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_ORDER_STATUS_ID', '1', 'For Pending orders, set the status of orders made with this payment module to this value.', '6', '0', 'lc_cfg_use_get_order_status_title', 'lc_cfg_set_order_statuses_pull_down_menu', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Set Complete Status', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_ORDER_STATUS_COMPLETE_ID', '4', 'For Completed orders, set the status of orders made with this payment module to this value', '6', '0', 'lc_cfg_use_get_order_status_title', 'lc_cfg_set_order_statuses_pull_down_menu', now())");
@@ -110,14 +104,12 @@ class Paypal_Payments_Advanced extends lC_Addon { // your addon must extend lC_A
   public function getKeys() {
     if (!isset($this->_keys)) {
       $this->_keys = array('ADDONS_PAYMENT_' . strtoupper($this->_code) . '_STATUS',
-                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_EC_STATUS',
-                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_PARTNER',
-                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_MERCH',
-                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_USER',
-                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_PASSWORD',
-                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TEMPLATE',
+                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_API_USERNAME',
+                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_API_PASSWORD',
+                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_API_SIGNATURE',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TRXTYPE',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TEST_MODE',
+                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_MERCHANT_COUNTRY',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_ZONE',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_ORDER_STATUS_ID',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_ORDER_STATUS_COMPLETE_ID',
