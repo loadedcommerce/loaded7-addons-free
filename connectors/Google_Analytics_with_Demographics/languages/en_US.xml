@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language>
+  <definitions>
+    <definition>
+      <key>Google_Analytics_with_Demographics_title</key>
+      <value><![CDATA[Google Analytics with Demographics]]></value>
+      <group>admin</group>
+    </definition>
+    <definition>
+      <key>Google_Analytics_with_Demographics_description</key>
+      <value><![CDATA[Add in the Javscript to every page to enable Google Analytics with optional demographics.<br>
+        See <a href="https://support.google.com/analytics/answer/2819948" target="_blank">support.google.com&hellip;</a>
+
+        ]]></value>
+      <group>admin</group>
+    </definition> 
+  </definitions>
+</language>

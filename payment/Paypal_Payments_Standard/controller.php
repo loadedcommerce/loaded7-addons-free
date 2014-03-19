@@ -21,7 +21,7 @@ class Paypal_Payments_Standard extends lC_Addon { // your addon must extend lC_A
     * The addon type (category)
     * valid types; payment, shipping, themes, checkout, catalog, admin, reports, connectors, other 
     */    
-    $this->_type = 'payment';
+    $this->_type = 'paypal';
    /**
     * The addon class name
     */    
