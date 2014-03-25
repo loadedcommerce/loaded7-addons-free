@@ -18,7 +18,7 @@ class InventoryUpdater extends lC_Addon { // your addon must extend lC_Addon
     * The addon type (category)
     * valid types; payment, shipping, themes, checkout, catalog, admin, reports, connectors, other 
     */    
-    $this->_type = 'catalog';
+    $this->_type = 'inventory';
    /**
     * The addon class name
     */    
