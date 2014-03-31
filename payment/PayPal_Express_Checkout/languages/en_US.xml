@@ -23,7 +23,7 @@
     </definition> 
     <definition>
       <key>payment_paypal_EC_method_blurb</key>
-      <value><![CDATA[powered by <img src="addons/Paypal_Express_Checkout/images/paypal_express_small.png" alt="PayPal Express Checkout" style="vertical-align:middle;">]]></value>
+      <value><![CDATA[powered by <img src="addons/PayPal_Express_Checkout/images/paypal_express_small.png" alt="PayPal Express Checkout" style="vertical-align:middle;">]]></value>
       <group>checkout</group>
     </definition>     
     <definition>   

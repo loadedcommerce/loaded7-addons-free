@@ -241,6 +241,7 @@ class lC_Payment_paypal_EC extends lC_Payment {
     $error = false;
     switch ($result) {
       case 'Success' :
+        $lC_ShoppingCart->setBillingMethod(array('id' => 'paypal_EC', 'title' => $this->_method_title));
         // update order status
         lC_Order::process($this->_order_id, $this->_order_status_complete);
         break;
@@ -563,8 +564,8 @@ class lC_Payment_paypal_EC extends lC_Payment {
     $transType = ADDONS_PAYMENT_PAYPAL_EXPRESS_CHECKOUT_TRXTYPE ;    
     $postData = $this->_getUserParams('SetExpressCheckout') .
                 "&PAYMENTACTION=" . $transType .
-                "&REQCONFIRMSHIPPING=0" .
-                "&ADDROVERRIDE=1" . 
+                //"&REQCONFIRMSHIPPING=0" .
+                //"&ADDROVERRIDE=1" . 
                 "&SOLUTIONTYPE=Sole" .
                 "&USERSELECTEDFUNDINGSOURCE=BML" .
                 "&RETURNURL=" . urlencode(lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true)) .
@@ -585,7 +586,10 @@ class lC_Payment_paypal_EC extends lC_Payment {
                 "&PAYMENTREQUEST_0_DESC=Description+goes+here". 
                 "&LOCALECODE=" . $lC_ShoppingCart->getBillingAddress('country_iso_code_2');
 
-    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));   
+    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData),'curl',true); 
+    
+    list($headers1, $body1,$body2) = explode("\r\n\r\n", $response, 3);
+      $response = (empty($body2)) ? $body1 : $body2;  
 
     if (!$response) { // server failure error
       $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_paypal_EC_error_server'), 'error');
