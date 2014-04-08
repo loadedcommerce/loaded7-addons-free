@@ -26,5 +26,10 @@
       <value><![CDATA[powered by <img src="addons/Loaded_Payments/images/loadedpayments-small.png" alt="Loaded Payments" style="vertical-align:middle">]]></value>
       <group>checkout</group>
     </definition>       
+    <definition>
+      <key>payment_loadedpayments_error_server</key>
+      <value><![CDATA[ERROR: There was no response from the server. Please try again]]></value>
+      <group>checkout</group>
+    </definition>       
   </definitions>
 </language>

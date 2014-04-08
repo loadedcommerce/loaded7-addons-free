@@ -11,6 +11,7 @@
 *  @copyright  (c) 2013 Loaded Commerce Team
 *  @license    http://loadedcommerce.com/license.html
 */
+require_once(DIR_FS_CATALOG . 'includes/classes/transport.php'); 
 class lC_Payment_loadedpayments extends lC_Payment {
  /**
   * The public title of the payment module
@@ -196,9 +197,16 @@ class lC_Payment_loadedpayments extends lC_Payment {
   public function process_button() {
     global $lC_Language, $lC_ShoppingCart, $lC_Currencies, $lC_Customer;  
 
+    $lC_ShoppingCart->setBillingMethod(array('id' => 'loadedpayments', 'title' => $this->_method_title));
     $loginid = (defined('ADDONS_PAYMENT_LOADED_PAYMENTS_USERNAME')) ? ADDONS_PAYMENT_LOADED_PAYMENTS_USERNAME : '';
     $transactionkey = (defined('ADDONS_PAYMENT_LOADED_PAYMENTS_TRANSKEY')) ? ADDONS_PAYMENT_LOADED_PAYMENTS_TRANSKEY : '';  
     $amount = $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode());
+    $token_only_mode_string = '';
+    if(ADDONS_PAYMENT_LOADED_PAYMENTS_TOKEN_ONLY_MODE == '1') {    
+      $amount = '1.00';
+      $token_only_mode_string = lc_draw_hidden_field('TransType', 'Void') . "\n" .
+                                lc_draw_hidden_field('CustomerTokenization', 'T') ;
+    }
     $sequence = rand(1, 1000); // a sequence number is randomly generated
     $timestamp = time(); // a timestamp is generated
     $fingerprint = hash_hmac("md5", $loginid . $amount . $sequence . $timestamp, $transactionkey); 
@@ -206,6 +214,7 @@ class lC_Payment_loadedpayments extends lC_Payment {
     $process_button_string = lc_draw_hidden_field('loginid', $loginid) . "\n" .
                              lc_draw_hidden_field('transactionkey', $transactionkey) . "\n" .
                              lc_draw_hidden_field('amount', $amount) . "\n" .
+                             $token_only_mode_string . "\n" .
                              lc_draw_hidden_field('invoicenumber', $this->_order_id) . "\n" .
                              lc_draw_hidden_field('ponumber', $this->_order_id) . "\n" .
                              lc_draw_hidden_field('firstname', $lC_ShoppingCart->getBillingAddress('firstname')) . "\n" .
@@ -241,12 +250,16 @@ class lC_Payment_loadedpayments extends lC_Payment {
   * @return string
   */
   public function process() {
-    global $lC_Language, $lC_Database, $lC_MessageStack;
+    global $lC_Language, $lC_Database, $lC_MessageStack, $lC_ShoppingCart;    
+    $lC_ShoppingCart->setBillingMethod(array('id' => 'loadedpayments', 'title' => $this->_method_title));
     
     $error = false;
     $success = (isset($_POST['success']) && $_POST['success'] == 'T') ? true : false;
     $code = (isset($_POST['responseCode']) && $_POST['responseCode'] != '') ? preg_replace('/[^0-9]/', '', $_POST['responseCode']) : NULL;
     $msg = (isset($_POST['error']) && $_POST['error'] != NULL) ? preg_replace('/[^a-zA-Z0-9]\:\|\[\]/', '', $_POST['error']) : NULL;
+    if(ADDONS_PAYMENT_LOADED_PAYMENTS_TOKEN_ONLY_MODE == '1' && $success == true) {
+      $success = $this->_voidTransaction($_POST['pnref']);
+    }
 
     switch ($success) {
       case true : // success
@@ -267,6 +280,22 @@ class lC_Payment_loadedpayments extends lC_Payment {
         $Qtransaction->bindValue(':transaction_return_value', $lC_XML->toXML());
         $Qtransaction->bindInt(':transaction_return_status', (strtoupper(trim($this->_transaction_response)) == '000') ? 1 : 0);
         $Qtransaction->execute();
+        ///////////
+        if(ADDONS_PAYMENT_LOADED_PAYMENTS_TOKEN_ONLY_MODE == '1') {    
+          $comments = 'Payment Token Created with following data'."\n".
+                      'PNRef value : '.$response_array['root']['pnref']."\n".
+                      'TokenNumber : '.$response_array['root']['tokenNumber']."\n";
+          $Qstatus = $lC_Database->query('insert into :table_orders_status_history (orders_id, orders_status_id, date_added, customer_notified, comments, administrators_id, append_comment) values (:orders_id, :orders_status_id, now(), :customer_notified, :comments, :administrators_id, :append_comment)');
+          $Qstatus->bindTable(':table_orders_status_history', TABLE_ORDERS_STATUS_HISTORY);
+          $Qstatus->bindInt(':orders_id', $this->_order_id);
+          $Qstatus->bindInt(':orders_status_id', $this->_order_status_complete);
+          $Qstatus->bindInt(':customer_notified', '0');
+          $Qstatus->bindValue(':comments', $comments);
+          $Qstatus->bindValue(':administrators_id', '-1');
+          $Qstatus->bindValue(':append_comment', '0');
+          $Qstatus->execute();
+        }
+        ///////////
         break;
 
       default : // error
@@ -361,5 +390,60 @@ class lC_Payment_loadedpayments extends lC_Payment {
     
     return 'width=' . $fWidth . '&height=' . $fHeight . '&scroll=' . $fScroll . '&' . $fStyle;
   }  
+  /**
+  * Voide the current transaction using PNref number
+  *
+  * @access private
+  * @return boolien
+  */
+  private function _voidTransaction($pnref=null) {
+    $loginid = (defined('ADDONS_PAYMENT_LOADED_PAYMENTS_USERNAME')) ? ADDONS_PAYMENT_LOADED_PAYMENTS_USERNAME : '';
+    $transactionkey = (defined('ADDONS_PAYMENT_LOADED_PAYMENTS_TRANSKEY')) ? ADDONS_PAYMENT_LOADED_PAYMENTS_TRANSKEY : '';  
+    if (defined('ADDONS_PAYMENT_LOADED_PAYMENTS_TESTMODE') && ADDONS_PAYMENT_LOADED_PAYMENTS_TESTMODE == '1') {
+      //$url = "http://test.payleap.com/SmartPayments/transact.asmx/ProcessCreditCard/";
+      $url = "https://uat.payleap.com/transactservices.svc/ProcessCreditCard";
+    } else {      
+      //$url = "https://secure1.payleap.com/"; // live server
+      $url = "https://secure1.payleap.com/transactservices.svc/ProcessCreditCard";
+      //$url = "https://secure.payleap.com/SmartPayments/transact.asmx/ProcessCreditCard"; // live server
+    }
+    $postData = 'UserName=' . $loginid . 
+                '&Password=' . $transactionkey . 
+                '&TransType=Void' . 
+                '&PNRef='.$pnref;
+    $response = transport::getResponse(array('url' => $url, 'method' => 'post', 'parameters' => $postData));
+    if (!$response) { // server failure error
+      $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_loadedpayments_error_server'), 'error');     
+      return false;
+    }
+    $resultxml = new SimpleXMLElement($response);
+    list( ,$Result) = each($resultxml->Result);
+    list( ,$RespMSG) = each($resultxml->RespMSG);
+    list( ,$PNRef) = each($resultxml->PNRef);
+    list( ,$AuthCode) = each($resultxml->AuthCode);
+    list( ,$GetAVSResult) = each($resultxml->GetAVSResult);
+    list( ,$GetCVResult) = each($resultxml->GetCVResult);
+    list( ,$GetCommercialCard) = each($resultxml->GetCommercialCard);
+    list( ,$HostCode) = each($resultxml->HostCode);
+    list( ,$InvNum) = each($resultxml->InvNum);
+    list( ,$Message) = each($resultxml->Message);
+    list( ,$ProcessedAsCreditCard) = each($resultxml->ProcessedAsCreditCard);
+    $dataArr = array('AuthCode' => $AuthCode,
+                     'GetAVSResult' => $GetAVSResult,
+                     'GetCVResult' => $GetCVResult,
+                     'GetCommercialCard' => $GetCommercialCard,
+                     'HostCode' => $HostCode,
+                     'InvNum' => $InvNum,
+                     'Message' => $Message,
+                     'PNRef' => $PNRef,
+                     'ProcessedAsCreditCard' => $ProcessedAsCreditCard,
+                     'RespMSG' => $RespMSG,
+                     'Result' => $Result);
+    if($Result == 0) {
+      return true;
+    } else {
+      return $RespMSG;
+    }
+  }
 }
 ?>
