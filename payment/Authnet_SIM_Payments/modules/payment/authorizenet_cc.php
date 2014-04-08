@@ -117,6 +117,9 @@ class lC_Payment_authorizenet_cc extends lC_Payment {
                     }
                   </style>';
 
+    // for IE we cannot send css in the post or it wil cause a XSS error
+    if (isset($_SESSION['browserName']) && $_SESSION['browserName'] == 'msie') $cssString = '';
+                      
     return $cssString;
   }
 

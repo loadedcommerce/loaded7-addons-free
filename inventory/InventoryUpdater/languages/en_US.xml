@@ -2,19 +2,19 @@
 <language>
   <definitions>
     <definition>
-      <key>addon_catalog_inventoryupdater_title</key>
+      <key>addon_title</key>
       <value><![CDATA[Dropshipper Integration: InventorySource]]></value>
       <group>checkout</group>
     </definition>
     <definition>
-      <key>addon_catalog_inventoryupdater_description</key>
+      <key>addon_description</key>
       <value><![CDATA[Integrate millions of products from dropship suppliers into your Loaded7 catalog automatically using the Inventory Source addon.  An active service at www.inventorysource.com is required to use this addon.]]></value>
       <group>checkout</group>
     </definition> 
     <definition>
-      <key>addon_catalog_inventoryupdater_blurb</key>
-      <value><![CDATA[<p class="big-message margin-bottom orange-gradient anthracite"><span class="big-message-icon icon-speech icon-red"></span><strong class="red">IMPORTANT:</strong>&nbsp;&nbsp;Disabling this add-on does not stop Inventory Source from reaching out and reading your inventory.  To completely stop all functionality, be sure to Uninstall this module.</p>]]></value>
-      <group>checkout</group>
+      <key>addon_other_loaded_text_on_hand</key>
+      <value><![CDATA[On Hand]]></value>
+      <group>product</group>
     </definition>        
   </definitions>
 </language>

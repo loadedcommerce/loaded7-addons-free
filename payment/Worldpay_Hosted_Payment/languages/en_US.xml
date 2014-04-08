@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language>
+  <definitions>
+    <definition>
+      <key>addon_payment_worldpay_hosted_payment_title</key>
+      <value><![CDATA[Worldpay]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>addon_payment_worldpay_hosted_payment_description</key>
+      <value><![CDATA[WorldPay processes millions of payments everyday for businesses all over the world quickly and securely. Accept credit and debit cards, bank transfers, bill payments and more.]]></value>
+      <group>checkout</group>
+    </definition>    
+    <definition>
+      <key>payment_worldpay_hosted_payment_title</key>
+      <value><![CDATA[Worldpay Junior]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>payment_worldpay_hosted_payment_method_title</key>
+      <value><![CDATA[Credit Card]]></value>
+      <group>checkout</group>
+    </definition>   
+    <definition>
+      <key>payment_worldpay_hosted_payment_method_blurb</key>
+      <value><![CDATA[powered by <img src="addons/Worldpay_Hosted_Payment/images/worldpay-small.png" style="vertical-align:middle">]]></value>
+      <group>checkout</group>
+    </definition>      
+  </definitions>
+</language>

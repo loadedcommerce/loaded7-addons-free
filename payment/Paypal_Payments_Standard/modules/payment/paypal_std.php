@@ -41,13 +41,6 @@ class lC_Payment_paypal_std extends lC_Payment {
   */  
   protected $_sort_order;   
  /**
-  * The order id
-  *
-  * @var integer
-  * @access protected
-  */ 
-  protected $_order_id;
- /**
   * Constructor
   */ 
   public function lC_Payment_paypal_std() {
@@ -146,7 +139,6 @@ class lC_Payment_paypal_std extends lC_Payment {
   * @return integer
   */ 
   public function confirmation() {
-    $this->_order_id = lC_Order::insert();   
    return false;
   }
 
@@ -157,7 +149,16 @@ class lC_Payment_paypal_std extends lC_Payment {
   * @return string
   */ 
   public function process_button() {
-    echo $this->_paypal_standard_params();
+    $order_id = lC_Order::insert($this->order_status);    
+    $_SESSION['cartSync']['paymentMethod'] = $this->_code;
+    // store the cartID info to match up on the return - to prevent multiple order IDs being created
+    $_SESSION['cartSync']['cartID'] = $_SESSION['cartID'];
+    $_SESSION['cartSync']['prepOrderID'] = $_SESSION['prepOrderID'];     
+    $_SESSION['cartSync']['orderCreated'] = TRUE;
+    $_SESSION['cartSync']['orderID'] = $order_id;
+
+    echo $this->_paypal_standard_params();        
+    
     return false;
   }
 
@@ -233,10 +234,12 @@ class lC_Payment_paypal_std extends lC_Payment {
         ); 
     }
 
-    $_order_id = (isset($_SESSION['prepOrderID']) && $_SESSION['prepOrderID'] != NULL) ? end(explode('-', $_SESSION['prepOrderID'])) : 0;
-    $return_href_link = lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
-    $cancel_href_link = lc_href_link(FILENAME_CHECKOUT, 'cart', 'SSL', true, true, true);
-    $notify_href_link = lc_href_link('addons/Paypal_Payments_Standard/ipn.php', 'ipn_order_id=' . $_order_id, 'SSL', true, true, true);
+    $order_id = (isset($_SESSION['prepOrderID']) && $_SESSION['prepOrderID'] != NULL) ? end(explode('-', $_SESSION['prepOrderID'])) : 0;
+    if ($order_id == 0) $order_id = (isset($_SESSION['cartSync']['orderID']) && $_SESSION['cartSync']['orderID'] != NULL) ? $_SESSION['cartSync']['orderID'] : 0;  
+    
+    $return_href_link = lc_href_link(FILENAME_CHECKOUT, 'process', 'AUTO', true, true, true);
+    $cancel_href_link = lc_href_link(FILENAME_CHECKOUT, 'cart', 'AUTO', true, true, true);
+    $notify_href_link = lc_href_link('addons/Paypal_Payments_Standard/ipn.php', 'ipn_order_id=' . $order_id, 'AUTO', true, true, true);
     $signature = $this->setTransactionID($amount);
 
     $paypal_standard_params = array(
@@ -275,8 +278,8 @@ class lC_Payment_paypal_std extends lC_Payment {
   * @access public
   * @return string
   */ 
-  public function process() {    
-    lC_Order::process($this->_order_id, $this->order_status);
+  public function process() { 
+    // performed by ipn.php
   }
 
   public function setTransactionID($amount) {

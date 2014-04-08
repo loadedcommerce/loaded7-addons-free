@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>Before HEAD, add GA Code include</id>
+  <version>1.0.0</version>
+  <vqmver>2.3.2</vqmver>
+  <author>Graith Internet</author>
+  <file name="templates/core.php">
+    <operation info="Just before closing head tag, add JS module code">
+      <search position="before"><![CDATA[</head>]]></search>         
+      <add><![CDATA[<?php include (DIR_FS_CATALOG . 'addons/Google_Analytics_with_Demographics/modules/google_analytics_code.php');?>]]></add>
+    </operation>
+  </file> 
+</modification>
