@@ -18,7 +18,7 @@
     </definition>       
     <definition>
       <key>payment_paypal_std_method_title</key>
-      <value><![CDATA[Credit Card]]></value>
+      <value><![CDATA[PayPal Payments Standard]]></value>
       <group>checkout</group>
     </definition> 
     <definition>
