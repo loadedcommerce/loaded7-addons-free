@@ -45,7 +45,7 @@ class PayPal_Recurring_Payments_Pro extends lC_Addon { // your addon must extend
    /**
     * The addon version
     */     
-    $this->_version = '1.0.0';
+    $this->_version = '1.0.1';
    /**
     * The Loaded 7 core compatibility version
     */     
@@ -98,7 +98,7 @@ class PayPal_Recurring_Payments_Pro extends lC_Addon { // your addon must extend
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Cards Accepted', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_ACCEPTED_TYPES', '', 'Accept these credit card types for this payment method.', '6', '0', 'lc_cfg_set_credit_cards_checkbox_field', now())");
 
 
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Billing period', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_BILLING_PERIOD', 'Month', 'The unit of measure for the billing cycle.', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(\'Day\', \'Week\', \'SemiMonth\', \'Month\', \'Year\'))', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Billing period', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_BILLING_PERIOD', 'Month', 'The unit of measure for the billing cycle.', '6', '0', 'lc_cfg_set_billing_period_pull_down_menu', 'lc_cfg_set_billing_period_pull_down_menu', now())");
 
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Billing Frequency', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_BILLING_FREQUENCY', '', 'The number of billing periods that make up one billing cycle. If the billing period is Week and the billing frequency is 6, PayPal schedules the payments every 6 weeks.', '6', '0', now())");    
 
@@ -134,6 +134,23 @@ class PayPal_Recurring_Payments_Pro extends lC_Addon { // your addon must extend
     }
 
     return $this->_keys;
-  }    
+  } 
+	
+}
+function lc_cfg_set_billing_period_pull_down_menu($default, $key = null) {
+  global $lC_Database, $lC_Language;
+  
+  $css_class = 'class="input with-small-padding"';
+
+  $name = (empty($key)) ? 'configuration_value' : 'configuration[' . $key . ']';
+
+  $billing_period_array = array(
+    array('id' => 'Day','text' => 'Day'),
+    array('id' => 'Week','text' => 'Week'),
+    array('id' => 'SemiMonth','text' => 'SemiMonth'),
+    array('id' => 'Month','text' => 'Month'),
+    array('id' => 'Year','text' => 'Year')
+    );
+  return lc_draw_pull_down_menu($name, $billing_period_array, $default, $css_class);
 }
 ?>
