@@ -42,11 +42,11 @@ class InventoryUpdater extends lC_Addon { // your addon must extend lC_Addon
    /**
     * The addon version
     */     
-    $this->_version = '1.0.1'; 
+    $this->_version = '1.0.2'; 
    /**
     * The Loaded 7 core compatibility version
     */     
-    $this->_compatibility = '7.000.0.0'; // the addon is compatible with this core version and later    
+    $this->_compatibility = '7.002.0.0'; // the addon is compatible with this core version and later    
    /**
     * The addon image used in the addons store listing
     */     

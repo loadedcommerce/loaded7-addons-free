@@ -85,7 +85,7 @@ class lC_Shipping_usps extends lC_Shipping {
   }
 
   public function quote() {
-    global $lC_Language, $lC_ShoppingCart;
+    global $lC_Language, $lC_ShoppingCart, $lC_Weight;
 
     $this->_setMachinable('False');
     $this->_setContainer('');
@@ -97,6 +97,8 @@ class lC_Shipping_usps extends lC_Shipping {
     $shipping_ounces = round(16 * ($shipping_weight - floor($shipping_weight)));
     $this->_setWeight($shipping_pounds, $shipping_ounces);
 
+    $shipping_weight_unit = $lC_Weight->display($lC_ShoppingCart->getWeight(), SHIPPING_WEIGHT_UNIT);
+    
     $uspsQuote = $this->_getQuote();
 
     if (is_array($uspsQuote)) {
@@ -105,7 +107,7 @@ class lC_Shipping_usps extends lC_Shipping {
                               'error' => $uspsQuote['error']);
       } else {
         $this->quotes = array('id' => $this->_code,
-                              'module' => $this->_title . ' (' . $lC_ShoppingCart->numberOfShippingBoxes() . ' x ' . $shipping_weight . 'lbs)',
+                              'module' => $this->_title . ' (' . $lC_ShoppingCart->numberOfShippingBoxes() . ' x ' . $shipping_weight . $shipping_weight_unit. ')',
                               'tax_class_id' => $this->tax_class);
 
         $methods = array();

@@ -45,7 +45,7 @@ class Paypal_Payments_Standard extends lC_Addon { // your addon must extend lC_A
    /**
     * The addon version
     */     
-    $this->_version = '1.0.1';
+    $this->_version = '1.0.2';
    /**
     * The Loaded 7 core compatibility version
     */     
