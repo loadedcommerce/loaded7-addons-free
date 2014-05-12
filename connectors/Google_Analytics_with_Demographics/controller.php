@@ -42,7 +42,7 @@ class Google_Analytics_with_Demographics extends lC_Addon { // your addon must e
    /**
     * The addon version
     */     
-    $this->_version = '1.0.2'; 
+    $this->_version = '1.0.3'; 
    /**
     * The Loaded 7 core compatibility version
     */     
@@ -56,6 +56,37 @@ class Google_Analytics_with_Demographics extends lC_Addon { // your addon must e
     */    
     $this->_enabled = (defined('ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_STATUS') && @constant('ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_STATUS') == '1') ? true : false;
   }
+
+  /**
+   * getAddonBlurb 
+   * @return [type] [description]
+   */
+  public function getAddonBlurb() {
+    if ($this->_blurb != '') return ($this->_blurb);
+    $hook_directory = DIR_FS_CATALOG . 'addons/' . $this->_code . '/hooks/';
+    
+    // This method is called once when the Setup button is pressed. It give an opportunity to check for hooks
+    
+    $core_hook = file_get_contents($hook_directory.'templates_core.xml');
+    
+    // Check to see if there are any templates installed that don't have hook files
+
+    $templates_installed = scandir(DIR_FS_CATALOG . 'templates');
+    foreach ($templates_installed as $template_file) {
+      if (preg_match('/([^\.]+)\.php$/',$template_file,$matches)) {
+        $hook_file = 'templates_'.$matches[1].'.xml';
+        if (!file_exists($hook_directory.$hook_file)) {
+          // Work out the hook contents from the core version with a str_replace
+          $new_hook = str_replace('core.php',$matches[1].'.php',$core_hook);
+          file_put_contents($hook_directory.$hook_file, $new_hook);
+          $this->_blurb .= '<h3>Added Support for template '.$matches[1].'</h3>';
+        }
+      }
+    }
+
+    return ($this->_blurb);
+  }
+
  /**
   * Checks to see if the addon has been installed
   *
