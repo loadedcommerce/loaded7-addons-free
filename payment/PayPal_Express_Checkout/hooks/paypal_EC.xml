@@ -11,7 +11,7 @@
       ]]></search>        
       <add><![CDATA[
       // ppec intercept
-      if (isset($_GET['ppec']) && $_GET['ppec'] == 'process') {
+      if (isset($_GET['ppec']) && $_GET['ppec'] == 'process' && isset($_GET['PPECBML'])) {
         // setExpressCheckout()
         include_once(DIR_FS_CATALOG . 'includes/classes/order.php');
         include_once(DIR_FS_CATALOG . 'includes/classes/payment.php');
@@ -19,7 +19,8 @@
         include_once(DIR_FS_CATALOG . 'addons/PayPal_Express_Checkout/modules/payment/paypal_EC.php');
         
         $ppec = new lC_Payment_paypal_EC();
-        $_SESSION['PPEC_TOKEN'] = $ppec->setExpressCheckout(); 
+        $bml = isset($_GET['BML']) ? true : false;
+        $_SESSION['PPEC_TOKEN'] = $ppec->setExpressCheckout($bml); 
         if (!$_SESSION['PPEC_TOKEN']) {
           lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'cart', 'SSL')); 
         }

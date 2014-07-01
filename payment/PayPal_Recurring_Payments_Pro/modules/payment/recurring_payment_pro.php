@@ -624,7 +624,10 @@ class lC_Payment_recurring_payment_pro extends lC_Payment {
                 "&TOKEN=" . $token . 
                 "&PAYERID=" . $payerID;
 
-    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));
+    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData),'curl',true); 
+    
+    list($headers1, $body1,$body2) = explode("\r\n\r\n", $response, 3);
+      $response = (empty($body2)) ? $body1 : $body2;
 
     if (!$response) { // server failure error
       $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_paypal_recurring_pro_error_server'), 'error');
@@ -716,8 +719,8 @@ class lC_Payment_recurring_payment_pro extends lC_Payment {
     }
     $postData = $this->_getUserParams('SetExpressCheckout') .
                 "&PAYMENTREQUEST_0_PAYMENTACTION=" . $transType . 
-                "&REQCONFIRMSHIPPING=0" .
-                "&ADDROVERRIDE=1" . 
+                //"&REQCONFIRMSHIPPING=0" .
+                //"&ADDROVERRIDE=1" . 
                 "&SOLUTIONTYPE=Sole" .  
                 "&PROFILESTARTDATE=" . date("Y-m-d h:m:i") .
                 "&BILLINGPERIOD=" . $billingPeriod .
@@ -727,9 +730,9 @@ class lC_Payment_recurring_payment_pro extends lC_Payment {
                 "&PAYMENTREQUEST_0_CURRENCYCODE=" . $_SESSION['currency'] .
                 "&INITAMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) . 
                 "&PAYMENTREQUEST_0_AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) . 
-                "&PAYMENTREQUEST_0_SHIPPINGAMT=" . $shippingTotal .
-                "&PAYMENTREQUEST_0_SHIPDISCAMT=" . (float)$discountTotal .
-                "&PAYMENTREQUEST_0_TAXAMT=" . (float)$taxTotal .
+                "&PAYMENTREQUEST_0_SHIPPINGAMT=" . $lC_Currencies->formatRaw($shippingTotal, $lC_Currencies->getCode()) .
+                "&PAYMENTREQUEST_0_SHIPDISCAMT=" . $lC_Currencies->formatRaw($discountTotal, $lC_Currencies->getCode()) .
+                "&PAYMENTREQUEST_0_TAXAMT=" . $lC_Currencies->formatRaw($taxTotal, $lC_Currencies->getCode()) .
                 "&PAYMENTREQUEST_0_SHIPTONAME=" . urlencode($lC_ShoppingCart->getShippingAddress('firstname') . " " . $lC_ShoppingCart->getShippingAddress('lastname')) . 
                 "&PAYMENTREQUEST_0_SHIPTOSTREET=" . urlencode($lC_ShoppingCart->getShippingAddress('street_address')) . 
                 "&PAYMENTREQUEST_0_SHIPTOCITY=" . urlencode($lC_ShoppingCart->getBillingAddress('city')) . 
@@ -741,7 +744,10 @@ class lC_Payment_recurring_payment_pro extends lC_Payment {
                 "&PAYMENTREQUEST_0_DESC=Description+goes+here". 
                 "&LOCALECODE=" . $lC_ShoppingCart->getBillingAddress('country_iso_code_2');
 
-    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));   
+    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData),'curl',true); 
+    
+    list($headers1, $body1,$body2) = explode("\r\n\r\n", $response, 3);
+      $response = (empty($body2)) ? $body1 : $body2;   
 
     if (!$response) { // server failure error
       $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_paypal_recurring_pro_error_server'), 'error');
@@ -774,6 +780,18 @@ class lC_Payment_recurring_payment_pro extends lC_Payment {
     $recurring_payment_pro_cc_expiry     = $_POST['recurring_payment_pro_cc_expiry'];
     $recurring_payment_pro_cc_cvv        = $_POST['recurring_payment_pro_cc_cvv'];
     
+    switch($recurring_payment_pro_cc_type) {
+      case 'American Express' :
+        $recurring_payment_pro_cc_type = "AMEX";
+        break;
+      case 'Discover Card' :
+        $recurring_payment_pro_cc_type = "DISCOVER";
+        break;
+      case 'MasterCard' :
+        $recurring_payment_pro_cc_type = "MASTERCARD";
+        break;
+    }
+
     $profileStartDate = date("Y-m-d h:i:s"); 
     $billingPeriod    = ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_BILLING_PERIOD ;  
     $billingFrequency = ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_BILLING_FREQUENCY ;  

@@ -45,7 +45,7 @@ class PayPal_Recurring_Payments_Pro extends lC_Addon { // your addon must extend
    /**
     * The addon version
     */     
-    $this->_version = '1.0.0';
+    $this->_version = '1.0.2';
    /**
     * The Loaded 7 core compatibility version
     */     

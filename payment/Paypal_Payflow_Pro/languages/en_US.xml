@@ -85,7 +85,7 @@
     </definition> 
     <definition>
       <key>payment_payflow_pro_express_method_blurb</key>
-      <value><![CDATA[powered by <img src="addons/PayPal_Payflow_Pro/images/payflow_express_small.png" alt="Payflow Pro Express Checkout" style="vertical-align:middle;">]]></value>
+      <value><![CDATA[powered by <img src="addons/Paypal_Payflow_Pro/images/payflow_express_small.png" alt="Payflow Pro Express Checkout" style="vertical-align:middle;">]]></value>
       <group>checkout</group>
     </definition>     
     <definition>

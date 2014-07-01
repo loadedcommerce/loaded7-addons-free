@@ -12,7 +12,7 @@
       <add><![CDATA[
 
         // ppec intercept
-      if (isset($_GET['ppec']) && $_GET['ppec'] == 'process') {
+      if (isset($_GET['ppec']) && $_GET['ppec'] == 'process' && isset($_GET['PPECRECURRINGPRO'])) {
         // setExpressCheckout()
         include_once(DIR_FS_CATALOG . 'includes/classes/order.php');
         include_once(DIR_FS_CATALOG . 'includes/classes/payment.php');
@@ -51,6 +51,8 @@
               </td>
               <td class="text-right"><?php echo lc_draw_radio_field('payment_method', 'recurring_payment_pro_ec', ($lC_ShoppingCart->hasBillingMethod() ? $lC_ShoppingCart->getBillingMethod('id') : null), 'id="pm_' . $counter . '"',''); ?></td>
               <?php
+              $counter++;
+              $radio_buttons++;
             } else {
               ?>
               <td class="content-checkout-listing-blank no-padding-left"></td>
@@ -65,9 +67,7 @@
   </file> 
   <file name="includes/content/checkout/confirmation.php">
     <operation info="Add PayPal Pro Express Checkout Logic">
-      <search position="after"><![CDATA[
-        include($lC_Vqmod->modCheck('includes/classes/payment.php'));
-      ]]></search>         
+      <search position="after"><![CDATA[include($lC_Vqmod->modCheck('includes/classes/payment.php'));]]></search>         
       <add><![CDATA[ 
      
         if($_POST['payment_method'] == 'recurring_payment_pro_ec' && ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_EC_STATUS == 'On') {
