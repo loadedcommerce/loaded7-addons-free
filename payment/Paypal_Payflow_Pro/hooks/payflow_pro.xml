@@ -70,7 +70,9 @@
   </file> 
   <file name="includes/content/checkout/confirmation.php">
     <operation info="Add PayPal Pro Express Checkout Logic">
-      <search position="after"><![CDATA[include($lC_Vqmod->modCheck('includes/classes/payment.php'));]]></search>         
+      <search position="after"><![CDATA[
+        include($lC_Vqmod->modCheck('includes/classes/payment.php'));
+      ]]></search>         
       <add><![CDATA[ 
      
         if($_POST['payment_method'] == 'payflow_pro_ec' && ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_EC_STATUS == 'On') {
