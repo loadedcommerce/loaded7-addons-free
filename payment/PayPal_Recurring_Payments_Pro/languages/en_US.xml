@@ -23,7 +23,7 @@
     </definition> 
     <definition>
       <key>payment_paypal_recurring_pro_method_blurb</key>
-      <value><![CDATA[powered by <img src="addons/PayPal_Recurring_Payments_Pro/images/recurring_payment_pro_small.png" alt="PayPal Pro - Credit Card Payment" style="vertical-align:middle;">]]></value>
+      <value><![CDATA[powered by <img src="addons/PayPal_Recurring_Payments_Pro/images/paypal-recurring-billing_small.png" alt="PayPal Pro - Credit Card Payment" style="vertical-align:middle;">]]></value>
       <group>checkout</group>
     </definition>   
     

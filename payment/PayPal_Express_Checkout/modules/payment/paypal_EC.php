@@ -187,7 +187,8 @@ class lC_Payment_paypal_EC extends lC_Payment {
   */ 
   public function process_button() {  
     if(!$_SESSION['PPEC_PAYDATA']) {
-      $_SESSION['PPEC_TOKEN'] = $this->setExpressCheckout(); 
+      $bml=true;
+      $_SESSION['PPEC_TOKEN'] = $this->setExpressCheckout($bml); 
 
       if (!$_SESSION['PPEC_TOKEN']) {
         lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'cart', 'SSL')); 
@@ -301,10 +302,10 @@ class lC_Payment_paypal_EC extends lC_Payment {
   * @access public
   * @return string
   */   
-  public function setExpressCheckout() {
+  public function setExpressCheckout($bml=false) {
     global $lC_MessageStack;
 
-    $response = $this->_setExpressCheckout();
+    $response = $this->_setExpressCheckout($bml);
 
     if (!$response) {
       if ($lC_MessageStack->size('shopping_cart') > 0) {
@@ -537,7 +538,7 @@ class lC_Payment_paypal_EC extends lC_Payment {
   * @access private
   * @return string
   */  
-  private function _setExpressCheckout() {
+  private function _setExpressCheckout($bml=false) {
     global $lC_ShoppingCart, $lC_Currencies, $lC_Language, $lC_MessageStack, $lC_Customer;
     $lC_Language->load('modules-payment');
     $action_url = $this->action_url;
@@ -567,7 +568,7 @@ class lC_Payment_paypal_EC extends lC_Payment {
                 //"&REQCONFIRMSHIPPING=0" .
                 //"&ADDROVERRIDE=1" . 
                 "&SOLUTIONTYPE=Sole" .
-                "&USERSELECTEDFUNDINGSOURCE=BML" .
+                //"&USERSELECTEDFUNDINGSOURCE=BML" .
                 "&RETURNURL=" . urlencode(lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true)) .
                 "&CANCELURL=" . urlencode(lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true)) .
                 "&PAYMENTREQUEST_0_CURRENCYCODE=" . $_SESSION['currency'] .
@@ -585,6 +586,10 @@ class lC_Payment_paypal_EC extends lC_Payment {
                 "&PAYMENTREQUEST_0_ITEMAMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getSubTotal(), $lC_Currencies->getCode()) .
                 "&PAYMENTREQUEST_0_DESC=Description+goes+here". 
                 "&LOCALECODE=" . $lC_ShoppingCart->getBillingAddress('country_iso_code_2');
+
+    if(defined('ADDONS_PAYMENT_PAYPAL_EXPRESS_CHECKOUT_BML_OPTION') && ADDONS_PAYMENT_PAYPAL_EXPRESS_CHECKOUT_BML_OPTION == 1 && $bml == true) {
+      $postData .= "&USERSELECTEDFUNDINGSOURCE=BML";
+    }
 
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData),'curl',true); 
     

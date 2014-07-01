@@ -252,15 +252,18 @@ class lC_Shipping_fedexwebservices extends lC_Shipping {
             }
             if ($shipping_weight <= 0) $shipping_weight = 0.1; 
             $new_shipping_weight += $shipping_weight;           
-            $request['RequestedShipment']['RequestedPackageLineItems'][] = array('Weight' => array('Value' => $shipping_weight,
+            $request['RequestedShipment']['RequestedPackageLineItems'][] = array('GroupPackageCount' => $shipping_num_boxes,
+                                                                                 'Weight' => array('Value' => $shipping_weight,
                                                                                                    'Units' => $this->_weight_type));
+
           }
         } else {
           // note $values is an array
           $new_shipping_num_boxes++;
           if ($values['weight'] <= 0) $values['weight'] = 0.1;
           $new_shipping_weight += $values['weight'];
-          $request['RequestedShipment']['RequestedPackageLineItems'][] = array('Weight' => array('Value' => $values['weight'],
+          $request['RequestedShipment']['RequestedPackageLineItems'][] = array('GroupPackageCount' => $new_shipping_num_boxes,
+                                                                               'Weight' => array('Value' => $values['weight'],
                                                                                                  'Units' => $this->_weight_type));
         }
       }

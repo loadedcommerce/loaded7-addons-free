@@ -663,8 +663,8 @@ class lC_Payment_paypal_pro extends lC_Payment {
     $transType = ADDONS_PAYMENT_PAYPAL_PAYMENTS_PRO_TRXTYPE ;    
     $postData = $this->_getUserParams('SetExpressCheckout') .
                 "&PAYMENTREQUEST_0_PAYMENTACTION=" . $transType . 
-                "&REQCONFIRMSHIPPING=0" .
-                "&ADDROVERRIDE=1" . 
+                //"&REQCONFIRMSHIPPING=0" .
+                //"&ADDROVERRIDE=1" . 
                 "&SOLUTIONTYPE=Sole" .                
                 "&RETURNURL=" . urlencode(lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true)) .
                 "&CANCELURL=" . urlencode(lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true)) .
@@ -684,7 +684,10 @@ class lC_Payment_paypal_pro extends lC_Payment {
                 "&PAYMENTREQUEST_0_DESC=Description+goes+here". 
                 "&LOCALECODE=" . $lC_ShoppingCart->getBillingAddress('country_iso_code_2');
 
-    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));   
+    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData),'curl',true); 
+    
+    list($headers1, $body1,$body2) = explode("\r\n\r\n", $response, 3);
+      $response = (empty($body2)) ? $body1 : $body2;   
 
     if (!$response) { // server failure error
       $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_paypal_pro_error_server'), 'error');
@@ -722,6 +725,18 @@ class lC_Payment_paypal_pro extends lC_Payment {
     $paypal_pro_cc_number     = $_POST['paypal_pro_cc_number'];    
     $paypal_pro_cc_expiry     = $_POST['paypal_pro_cc_expiry'];
     $paypal_pro_cc_cvv        = $_POST['paypal_pro_cc_cvv'];
+
+    switch($paypal_pro_cc_type) {
+      case 'American Express' :
+        $paypal_pro_cc_type = "AMEX";
+        break;
+      case 'Discover Card' :
+        $paypal_pro_cc_type = "DISCOVER";
+        break;
+      case 'MasterCard' :
+        $paypal_pro_cc_type = "MASTERCARD";
+        break;
+    }
 
     $transType = ADDONS_PAYMENT_PAYPAL_PAYMENTS_PRO_TRXTYPE ;    
     $postData = $this->_getUserParams('DoDirectPayment', $version) .

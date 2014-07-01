@@ -149,6 +149,15 @@ class lC_Payment_paypal_std extends lC_Payment {
   * @return string
   */ 
   public function process_button() {
+
+    if(isset($_SESSION['cartSync']))  {
+      lC_Order::remove($_SESSION['cartSync']['orderID']);
+      unset($_SESSION['cartSync']['paymentMethod']);
+      unset($_SESSION['cartSync']['prepOrderID']);
+      unset($_SESSION['cartSync']['orderCreated']);
+      unset($_SESSION['cartSync']['orderID']);
+    }
+
     $order_id = lC_Order::insert($this->order_status);    
     $_SESSION['cartSync']['paymentMethod'] = $this->_code;
     // store the cartID info to match up on the return - to prevent multiple order IDs being created
@@ -186,17 +195,26 @@ class lC_Payment_paypal_std extends lC_Payment {
       if ($ot['code'] == 'tax') $taxTotal = (float)$ot['value'];
     } 
 
-    $shoppingcart_products = $lC_ShoppingCart->getProducts();
+    $shoppingcart_products = $lC_ShoppingCart->getProducts();  
+
+
     $amount = $lC_Currencies->formatRaw($lC_ShoppingCart->getSubTotal(), $lC_Currencies->getCode());
 
-    if(ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_METHOD == 'Itemized') { 
-      $discount_amount_cart = 0;     
+    $discount_amount_cart = 0;
+    foreach ($lC_ShoppingCart->getOrderTotals() as $module) {  
+      if($module['code'] == 'coupon') {
+        $discount_amount_cart = $module['value'];          
+      }
+    }
+
+
+    if(ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_METHOD == 'Itemized') {
 
       $paypal_action_params = array(
         'upload' => sizeof($shoppingcart_products),
         'redirect_cmd' => '_cart',
         'handling_cart' => $shippingTotal,
-        'discount_amount_cart' => $discount_amount_cart
+        'discount_amount' => $discount_amount_cart
         );
        for ($i=1; $i<=sizeof($shoppingcart_products); $i++) {
           $paypal_shoppingcart_params = array(
@@ -230,6 +248,7 @@ class lC_Payment_paypal_std extends lC_Payment {
         'redirect_cmd' => '_xclick',
         'amount' => $amount,
         'shipping' => $shippingTotal,
+        'discount_amount' => $discount_amount_cart,
         'item_number' => $item_number
         ); 
     }

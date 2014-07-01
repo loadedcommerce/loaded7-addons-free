@@ -499,6 +499,7 @@ class lC_Payment_payflow_EC extends lC_Payment {
                 "&TENDER=P" . 
                 "&ACTION=D" . 
                 "&BUTTONSOURCE=CRELoaded_Cart_EC_US" .
+                "&CURRENCY=" . $_SESSION['currency'] .
                 "&AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) .
                 "&TOKEN=" . $token . 
                 "&PAYERID=" . $payerID;
@@ -582,7 +583,7 @@ class lC_Payment_payflow_EC extends lC_Payment {
       $itemsString .= '&L_NAME' . (string)$cnt . '=' . $products['name'] .
                       '&L_DESC' . (string)$cnt . '=' . substr($products['description'], 0, 40) .
                       //'&L_SKU' . (string)$cnt . '=' . $products['id'] .
-                      '&L_COST' . (string)$cnt . '=' . $products['price'] .
+                      '&L_COST' . (string)$cnt . '=' . $lC_Currencies->formatRaw($products['price'], $lC_Currencies->getCode()) .
                       '&L_QTY' . (string)$cnt . '=' . $products['quantity'];
       $cnt++;                      
     } 
@@ -600,15 +601,15 @@ class lC_Payment_payflow_EC extends lC_Payment {
     $postData = $this->_getUserParams() .  
                 "&TRXTYPE=" . $transType . 
                 "&TENDER=P" . 
-                "&USERSELECTEDFUNDINGSOURCE=BML" .
+                //"&USERSELECTEDFUNDINGSOURCE=BML" .
                 "&ACTION=S" . $itemsString .
                 "&AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) .
                 "&RETURNURL=" . lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true) .
                 "&CANCELURL=" . lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true) .                 
                 "&ITEMAMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getSubTotal(), $lC_Currencies->getCode()) . 
                 "&TAXAMT=" . $lC_Currencies->formatRaw($taxTotal, $lC_Currencies->getCode()) . 
-                "&FREIGHTAMT=" . $shippingTotal .               
-                "&DISCOUNT=" . $discountTotal .               
+                "&FREIGHTAMT=" . $lC_Currencies->formatRaw($shippingTotal, $lC_Currencies->getCode()) .               
+                "&DISCOUNT=" . $lC_Currencies->formatRaw($discountTotal, $lC_Currencies->getCode()) .               
                 "&PHONENUM=" . $lC_Customer->getTelephone() . 
                 "&EMAIL=" . $lC_Customer->getEmailAddress() . 
                 "&SHIPTONAME=" . $lC_ShoppingCart->getShippingAddress('firstname') . " " . $lC_ShoppingCart->getShippingAddress('lastname') .
@@ -618,10 +619,13 @@ class lC_Payment_payflow_EC extends lC_Payment {
                 "&SHIPTOCOUNTRY=" . $lC_ShoppingCart->getShippingAddress('country_iso_code_2') . 
                 "&SHIPTOZIP=" . $lC_ShoppingCart->getShippingAddress('postcode') . 
                 "&CURRENCY=" . $_SESSION['currency'] . 
-                "&INVNUM=" . $this->_order_id . 
-                "&ADDROVERRIDE=1";
+                "&INVNUM=" . $this->_order_id ;/*. 
+                "&ADDROVERRIDE=1";*/
     
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));    
+   /* list($headers1, $body1,$body2) = explode("\r\n\r\n", $response, 3);
+      $response = (empty($body2)) ? $body1 : $body2;  
+   */
    
     if (!$response) { // server failure error
       $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_payflow_EC_error_server'), 'error');

@@ -12,15 +12,18 @@
       <add><![CDATA[
 
         // ppec intercept
-      if (isset($_GET['ppec']) && $_GET['ppec'] == 'process') {
+      if (isset($_GET['ppec']) && $_GET['ppec'] == 'process' && isset($_GET['PPECPAYFLOWPRO'])) {
         // setExpressCheckout()
         include_once(DIR_FS_CATALOG . 'includes/classes/order.php');
         include_once(DIR_FS_CATALOG . 'includes/classes/payment.php');
         
         include_once(DIR_FS_CATALOG . 'addons/Paypal_Payflow_Pro/modules/payment/payflow_pro.php');
         
+
+      
         $ppec = new lC_Payment_payflow_pro();
         $_SESSION['PPEC_TOKEN'] = $ppec->setExpressCheckout(); 
+
         if (!$_SESSION['PPEC_TOKEN']) {
           lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'cart', 'SSL')); 
         }

@@ -401,7 +401,19 @@ class lC_Payment_payflow_pro extends lC_Payment {
     $payflow_pro_cc_cvv        = $_POST['payflow_pro_cc_cvv'];
     $comments = '';
     $orderdesc = '';
-
+    
+    switch($payflow_pro_cc_type) {
+      case 'American Express' :
+        $payflow_pro_cc_type = "AMEX";
+        break;
+      case 'Discover Card' :
+        $payflow_pro_cc_type = "DISCOVER";
+        break;
+      case 'MasterCard' :
+        $payflow_pro_cc_type = "MASTERCARD";
+        break;
+    }
+    
 // get the shipping amount
     $taxTotal = 0;
     $shippingTotal = 0;
@@ -467,6 +479,8 @@ class lC_Payment_payflow_pro extends lC_Payment {
   */   
   public function setExpressCheckout() {
     global $lC_MessageStack;
+
+
 
     $response = $this->_setExpressCheckout();
     if (!$response) {
@@ -638,8 +652,8 @@ class lC_Payment_payflow_pro extends lC_Payment {
       $action_url = 'https://payflowpro.paypal.com';  // production url
     }     
 
-    $transType = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE == 'Authorization') ? 'A' : 'S';
-    $returnUrl = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE == 'IFRAME') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
+    $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TRXTYPE == 'Authorization') ? 'A' : 'S';
+    $returnUrl = (defined('ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TEMPLATE') && ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TEMPLATE == 'IFRAME') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
 
     $postData = $this->_getUserParams() .  
                 "&TRXTYPE=" . $transType . 
@@ -683,8 +697,8 @@ class lC_Payment_payflow_pro extends lC_Payment {
       $action_url = 'https://payflowpro.paypal.com';  // production url
     }     
 
-    $transType = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE == 'Authorization') ? 'A' : 'S';
-    $returnUrl = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TEMPLATE == 'IFRAME') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
+    $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TRXTYPE == 'Authorization') ? 'A' : 'S';
+    $returnUrl = (defined('ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TEMPLATE') && ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TEMPLATE == 'IFRAME') ?  lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true) : lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true);
 
     $postData = $this->_getUserParams() .  
                 "&TRXTYPE=" . $transType . 
@@ -745,7 +759,7 @@ class lC_Payment_payflow_pro extends lC_Payment {
       if ($ot['code'] == 'tax') $taxTotal = (float)$ot['value'];
     }         
 
-    $transType = (defined('ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE') && ADDONS_PAYMENT_PAYFLOW_EXPRESS_CHECKOUT_TRXTYPE == 'Authorization') ? 'A' : 'S';
+    $transType = (defined('ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TRXTYPE') && ADDONS_PAYMENT_PAYPAL_PAYFLOW_PRO_TRXTYPE == 'Authorization') ? 'A' : 'S';
     $postData = $this->_getUserParams() .  
                 "&TRXTYPE=" . $transType . 
                 "&TENDER=P" .                 
@@ -766,10 +780,14 @@ class lC_Payment_payflow_pro extends lC_Payment {
                 "&SHIPTOCOUNTRY=" . $lC_ShoppingCart->getShippingAddress('country_iso_code_2') . 
                 "&SHIPTOZIP=" . $lC_ShoppingCart->getShippingAddress('postcode') . 
                 "&CURRENCY=" . $_SESSION['currency'] . 
-                "&INVNUM=" . $this->_order_id . 
-                "&ADDROVERRIDE=1";
+                "&INVNUM=" . $this->_order_id ;/*. 
+                "&ADDROVERRIDE=1";*/
 
-    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));    
+    $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData),'curl',true); 
+    
+    list($headers1, $body1,$body2) = explode("\r\n\r\n", $response, 3);
+      $response = (empty($body2)) ? $body1 : $body2;  
+
    
     if (!$response) { // server failure error
       $lC_MessageStack->add('shopping_cart', $lC_Language->get('payment_payflow_pro_error_server'), 'error');

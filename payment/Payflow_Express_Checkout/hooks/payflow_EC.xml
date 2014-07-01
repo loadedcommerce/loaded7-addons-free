@@ -11,7 +11,7 @@
       ]]></search>        
       <add><![CDATA[
       // ppec intercept
-      if (isset($_GET['ppec']) && $_GET['ppec'] == 'process') {
+      if (isset($_GET['ppec']) && $_GET['ppec'] == 'process' && isset($_GET['PPECPAYFLOW'])) {
         // setExpressCheckout()
         include_once(DIR_FS_CATALOG . 'includes/classes/order.php');
         include_once(DIR_FS_CATALOG . 'includes/classes/payment.php');
