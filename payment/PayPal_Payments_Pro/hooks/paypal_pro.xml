@@ -20,7 +20,8 @@
         include_once(DIR_FS_CATALOG . 'addons/PayPal_Payments_Pro/modules/payment/paypal_pro.php');
         
         $ppec = new lC_Payment_paypal_pro();
-        $_SESSION['PPEC_TOKEN'] = $ppec->setExpressCheckout(); 
+        $bml = isset($_GET['BML']) ? true : false;
+        $_SESSION['PPEC_TOKEN'] = $ppec->setExpressCheckout($bml); 
         if (!$_SESSION['PPEC_TOKEN']) {
           lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'cart', 'SSL')); 
         }

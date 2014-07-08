@@ -479,6 +479,7 @@ class lC_Payment_paypal_EC extends lC_Payment {
     $postData = $this->_getUserParams('DoExpressCheckoutPayment') .  
                 "&PAYMENTACTION=" . $transType . 
                 "&BUTTONSOURCE=LoadedCommerce_Cart" .
+                "&PAYMENTREQUEST_0_CURRENCYCODE=" . $_SESSION['currency'] .
                 "&PAYMENTREQUEST_0_AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) .
                 "&TOKEN=" . $token . 
                 "&PAYERID=" . $payerID;
@@ -573,9 +574,9 @@ class lC_Payment_paypal_EC extends lC_Payment {
                 "&CANCELURL=" . urlencode(lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true)) .
                 "&PAYMENTREQUEST_0_CURRENCYCODE=" . $_SESSION['currency'] .
                 "&PAYMENTREQUEST_0_AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) . 
-                "&PAYMENTREQUEST_0_SHIPPINGAMT=" . $shippingTotal .
-                "&PAYMENTREQUEST_0_SHIPDISCAMT=" . (float)$discountTotal .
-                "&PAYMENTREQUEST_0_TAXAMT=" . (float)$taxTotal .
+                "&PAYMENTREQUEST_0_SHIPPINGAMT=" . $lC_Currencies->formatRaw($shippingTotal, $lC_Currencies->getCode()) .
+                "&PAYMENTREQUEST_0_SHIPDISCAMT=" . $lC_Currencies->formatRaw($discountTotal, $lC_Currencies->getCode()) .
+                "&PAYMENTREQUEST_0_TAXAMT=" . $lC_Currencies->formatRaw($taxTotal, $lC_Currencies->getCode()) .
                 "&PAYMENTREQUEST_0_SHIPTONAME=" . urlencode($lC_ShoppingCart->getShippingAddress('firstname') . " " . $lC_ShoppingCart->getShippingAddress('lastname')) . 
                 "&PAYMENTREQUEST_0_SHIPTOSTREET=" . urlencode($lC_ShoppingCart->getShippingAddress('street_address')) . 
                 "&PAYMENTREQUEST_0_SHIPTOCITY=" . urlencode($lC_ShoppingCart->getBillingAddress('city')) . 

@@ -202,8 +202,8 @@ class lC_Payment_paypal_adv extends lC_Payment {
   */ 
   public function process_button() { 
     global $lC_MessageStack;
-
-    $response = $this->_getSecureToken();
+    $bml=true;
+    $response = $this->_getSecureToken($bml);
 
     $process_button_string = lc_draw_hidden_field('SECURETOKEN', $response['SECURETOKEN']) . 
                              lc_draw_hidden_field('SECURETOKENID', $response['SECURETOKENID']); 
@@ -316,10 +316,10 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @access public
   * @return string
   */   
-  public function setExpressCheckout() {
+  public function setExpressCheckout($bml=false) {
     global $lC_MessageStack;
 
-    $response = $this->_setExpressCheckout();
+    $response = $this->_setExpressCheckout($bml);
 
     if (!$response) {
       if ($lC_MessageStack->size('shopping_cart') > 0) {
@@ -565,7 +565,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @access private
   * @return string
   */  
-  private function _setExpressCheckout() {
+  private function _setExpressCheckout($bml=false) {
     global $lC_ShoppingCart, $lC_Currencies, $lC_Language, $lC_MessageStack, $lC_Customer;
     $lC_Language->load('modules-payment');
      
@@ -625,9 +625,13 @@ class lC_Payment_paypal_adv extends lC_Payment {
                 "&SHIPTOPHONENUM=" . $lC_Customer->getTelephone() . 
                 "&SHIPTOEMAIL=" . $lC_Customer->getEmailAddress() . 
                 "&CURRENCY=" . $_SESSION['currency'] . 
-                "&INVNUM=" . $this->_order_id . 
-                "&ADDROVERRIDE=1"; 
-                           
+                "&INVNUM=" . $this->_order_id ;/*. 
+                "&ADDROVERRIDE=1"; */
+
+    if(defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_BML_OPTION') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_BML_OPTION == 1 && $bml == true) {
+      $postData .= "&USERSELECTEDFUNDINGSOURCE=BML";
+    }      
+    
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));    
    
     if (!$response) { // server failure error
@@ -650,7 +654,7 @@ class lC_Payment_paypal_adv extends lC_Payment {
   * @access private
   * @return array
   */
-  private function _getSecureToken() {   
+  private function _getSecureToken($bml=false) {   
     global $lC_Language, $lC_ShoppingCart, $lC_Currencies, $lC_Customer, $lC_MessageStack;
         
     if (defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE') && ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_TEST_MODE == '1') {
@@ -724,7 +728,11 @@ class lC_Payment_paypal_adv extends lC_Payment {
                 "&URLMETHOD=POST" . 
                 "&CSCREQUIRED=TRUE" . 
                 "&CSCEDIT=TRUE" . 
-                "&ADDROVERRIDE=1"; 
+                "&ADDROVERRIDE=1";  
+    
+    if(defined('ADDONS_PAYMENT_PAYPAL_PAYMENTS_ADVANCED_BML_OPTION') && ADDONS_PAYMENT_PAYPAL_EXPRESS_CHECKOUT_BML_OPTION == 1 && $bml == true) {
+      $postData .= "&USERSELECTEDFUNDINGSOURCE=BML";
+    }   
                 
     $response = transport::getResponse(array('url' => $action_url, 'method' => 'post', 'parameters' => $postData));
     
