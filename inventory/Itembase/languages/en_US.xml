@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language>
+  <definitions>
+    <definition>
+      <key>addon_connectors_ib_title</key>
+      <value><![CDATA[itembase]]></value>
+      <group>connectors</group>
+    </definition>
+    <definition>
+      <key>addon_connectors_ib_description</key>
+      <value><![CDATA[itembase - Personal Shopping Manager and Inventory (SEO links, Brand Booster, Traffic Source, Affiliate Channel)]]></value>
+      <group>connectors</group>
+    </definition>
+  </definitions>
+</language>
