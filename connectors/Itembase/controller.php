@@ -54,7 +54,9 @@ class Itembase extends lC_Addon { // your addon must extend lC_Addon
     * The addon enable/disable switch
     */
     $this->_enabled = (defined('ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_STATUS') && @constant('ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_STATUS') == '1') ? true : false;
-    $this->_rating = '5';
+
+    $this->_auto_install = true;    
+    
   }
  /**
   * Checks to see if the addon has been installed
@@ -83,7 +85,7 @@ class Itembase extends lC_Addon { // your addon must extend lC_Addon
       }
 
 
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable AddOn', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_STATUS', '-1', 'Do you want to enable this addon?', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable AddOn', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_STATUS', '1', 'Do you want to enable this addon?', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Itembase API key', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_API', '', 'Enter your itembase API key.', '6', '10',now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Itembase Secret key', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_SECRET', '', 'Enter your itembase Secret key.', '6', '20',now())");
 
