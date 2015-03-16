@@ -149,7 +149,7 @@ class lC_Payment_authorizenet_cc extends lC_Payment {
     
     $order_id = lC_Order::insert();
     
-    $type = (defined('ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TYPE') && ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TYPE == 'AUTH_ONLY') ? 'AUTH_ONLY' : 'AUTH_CAPTURE';
+    $type = (defined('ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TYPE') && ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TYPE == 'Auth Only') ? 'AUTH_ONLY' : 'AUTH_CAPTURE';
 
     $process_button_string = $this->_InsertFP(ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_LOGIN_ID, ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_KEY, $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal()),rand(1, 1000), $lC_Currencies->getCode());
 
