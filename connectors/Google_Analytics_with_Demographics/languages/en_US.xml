@@ -8,10 +8,7 @@
     </definition>
     <definition>
       <key>Google_Analytics_with_Demographics_description</key>
-      <value><![CDATA[Add in the Javscript to every page to enable Google Analytics with optional demographics.<br>
-        See <a href="https://support.google.com/analytics/answer/2819948" target="_blank">support.google.com&hellip;</a>
-
-        ]]></value>
+      <value><![CDATA[The Google Analytics Platform lets you measure user interactions with your business across various devices and environments, at Google speed and scale. Gain new insights and optimize the performance of your business. This addon includes demographics and Ecommerce tracking options.]]></value>
       <group>admin</group>
     </definition> 
   </definitions>
