@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language>
+  <definitions>
+    <definition>
+      <key>addon_payment_bank_transfer_title</key>
+      <value><![CDATA[Bank Transfer]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>addon_payment_bank_transfer_description</key>
+      <value><![CDATA[Accept Bank Transfer as payment. Provide bank details to transfer funds to your bank account.]]></value>
+      <group>checkout</group>
+    </definition>  
+    <definition>
+      <key>payment_bank_transfer_title</key>
+      <value><![CDATA[Bank Transfer]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>payment_bank_transfer_method_title</key>
+      <value><![CDATA[Bank Transfer]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>payment_bank_transfer_method</key>
+      <value><![CDATA[Bank Transfer]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>payment_bank_transfer_email_footer</key>
+      <value><![CDATA[Make Payable To: 
+      %s
+      Account Number: %s
+      Bank Name: %s
+      SWIFT Code: %s
+
+Your order will not ship until we receive payment.]]></value>
+      <group>checkout</group>
+    </definition>
+  </definitions>
+</language>
