@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language>
+  <definitions>
+    <definition>
+      <key>addon_shipping_pickup_title</key>
+      <value><![CDATA[Store Pickup]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>addon_shipping_pickup_description</key>
+      <value><![CDATA[Let customers order online and pickup at your store.]]></value>
+      <group>checkout</group>
+    </definition>  
+    <definition>
+      <key>shipping_pickup_title</key>
+      <value><![CDATA[Store Pickup]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>shipping_pickup_description</key>
+      <value><![CDATA[Store Pickup]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>shipping_pickup_method</key>
+      <value><![CDATA[Best Way]]></value>
+      <group>checkout</group>
+    </definition>
+  </definitions>
+</language>
