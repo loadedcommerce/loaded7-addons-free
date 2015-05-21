@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>After VQMOD-002, add localization code</id>
+  <version>1.0.0</version>
+  <vqmver>2.3.2</vqmver>
+  <author>loadedcommerce.com</author>
+  <file name="includes/applications/orders/classes/orders.php">
+    <operation info="After , add localization code">
+      <search position="after"><![CDATA[
+         foreach ( $lC_Order->getTotals() as $totals ) {
+      ]]></search>        
+      <add><![CDATA[
+	 
+	$special_shipping = explode(' ',$totals['title']);
+		$found = $special_shipping[0];
+		
+		if($found == 'Special'){
+			$totals['text'] = '-' ; 
+		}
+      ]]></add>
+    </operation>
+	<operation info="After , add localization code">
+      <search position="after"><![CDATA[
+    $str_flag = ($Qtotals->value('class') == 'coupon') ? ' - ' : '' ;  
+      ]]></search>        
+      <add><![CDATA[
+	  $value = explode(' ',$Qtotals->value('title'));
+      $special = $value[0];
+      ]]></add>
+    </operation>
+	<operation info="Replace , add localization code">
+      <search position="replace"><![CDATA[
+      lc_draw_input_field("value_" . $Qtotals->value('class'), $str_flag.$lC_Currencies->format($Qtotals->value('value')), ' id="value_'. $Qtotals->value('class'). '"  class="input with-small-padding" style="width:10%;text-align:right;min-width:65px;" onkeyup="updateGrandTotal(\''.$lC_Currencies->getSymbolLeft().'\');"') . '&nbsp;&nbsp;' .
+      ]]></search>        
+      <add><![CDATA[
+	   lc_draw_input_field("value_" . $Qtotals->value('class'), $str_flag.($special != 'Special')? $lC_Currencies->format($Qtotals->value('value')) : '-', ' id="value_'. $Qtotals->value('class'). '"  class="input with-small-padding" style="width:10%;text-align:right;min-width:65px;" onkeyup="updateGrandTotal(\''.$lC_Currencies->getSymbolLeft().'\');"') . '&nbsp;&nbsp;' .
+      ]]></add>
+    </operation>
+  </file>   
+</modification>
+
