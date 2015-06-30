@@ -148,6 +148,8 @@ class lC_Payment_authorizenet_cc extends lC_Payment {
     // $url = 'process&'.session_name().'='.session_id();
     
     $order_id = lC_Order::insert();
+    
+    $type = (defined('ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TYPE') && ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TYPE == 'Auth Only') ? 'AUTH_ONLY' : 'AUTH_CAPTURE';
 
     $process_button_string = $this->_InsertFP(ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_LOGIN_ID, ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_KEY, $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal()),rand(1, 1000), $lC_Currencies->getCode());
 
@@ -155,6 +157,7 @@ class lC_Payment_authorizenet_cc extends lC_Payment {
     $process_button_string .= lc_draw_hidden_field('x_version', '3.1') . "\n";
     $process_button_string .= lc_draw_hidden_field('x_show_form', 'PAYMENT_FORM') . "\n";
     $process_button_string .= lc_draw_hidden_field('x_relay_response', 'TRUE') . "\n";
+    $process_button_string .= lc_draw_hidden_field('x_type', $type) . "\n";
     $process_button_string .= lc_draw_hidden_field('x_relay_url', lc_href_link(FILENAME_IREDIRECT, '', 'NONSSL', true, true, true)) . "\n";
     $process_button_string .= lc_draw_hidden_field('x_header_html_payment_form', $this->customCss()) . "\n";
     $process_button_string .= lc_draw_hidden_field('x_first_name', $lC_ShoppingCart->getBillingAddress('firstname')) . "\n";

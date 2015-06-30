@@ -211,9 +211,11 @@ class lC_Payment_paypal_EC extends lC_Payment {
 
     if (isset($_SESSION['PPEC_TOKEN']) && $_SESSION['PPEC_TOKEN'] != NULL) {  // this is express checkout - goto ec process
 
-      if (isset($_GET['PayerID']) && $_GET['PayerID'] != NULL) {
-        $_SESSION['PPEC_PAYDATA']['TOKEN'] = $_GET['token'];
-        $_SESSION['PPEC_PAYDATA']['PAYERID'] = $_GET['PayerID'];
+      $url_parts = parse_url($_SERVER['REQUEST_URI']);    
+      $params = utility::nvp2arr($url_parts['query']);
+      if (isset($params['PayerID']) && $params['PayerID'] != NULL) {
+        $_SESSION['PPEC_PAYDATA']['TOKEN'] = $params['token'];
+        $_SESSION['PPEC_PAYDATA']['PAYERID'] = $params['PayerID'];
         if (!$this->_ec_process()) {
 
           unset($_SESSION['PPEC_TOKEN']);
@@ -222,7 +224,7 @@ class lC_Payment_paypal_EC extends lC_Payment {
           // ec step1 success
           unset($_SESSION['PPEC_TOKEN']);
           // set the skip payment flag
-          $_SESSION['SKIP_PAYMENT_PAGE'] = TRUE;          
+          $_SESSION['SKIP_PAYMENT_PAGE'] = TRUE;  
           lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'confirmation', 'SSL'));
         }
       } else { // customer clicked cancel      
@@ -238,7 +240,6 @@ class lC_Payment_paypal_EC extends lC_Payment {
       $result = (isset($_POST['RESULT']) && $_POST['RESULT'] != NULL) ? $_POST['RESULT'] : NULL;
       if (!isset($this->_order_id) || $this->_order_id == NULL) $this->_order_id = (isset($_POST['INVNUM']) && !empty($_POST['INVNUM'])) ? $_POST['INVNUM'] : $_POST['INVOICE'];
     }               
-
     $error = false;
     switch ($result) {
       case 'Success' :

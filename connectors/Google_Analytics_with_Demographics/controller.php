@@ -42,7 +42,7 @@ class Google_Analytics_with_Demographics extends lC_Addon { // your addon must e
    /**
     * The addon version
     */     
-    $this->_version = '1.0.3'; 
+    $this->_version = '1.1.0'; 
    /**
     * The Loaded 7 core compatibility version
     */     
@@ -107,7 +107,8 @@ class Google_Analytics_with_Demographics extends lC_Addon { // your addon must e
 
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable AddOn', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_STATUS', '1', 'Do you want to enable this addon?', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Google Analytics Account Number', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_ACCOUNT', '', 'Enter your Google Analytics account number. This number should start with UA-', '6', '10',now())");
-    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable Demographics', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_DEMOGRAPHICS', '-1', 'Do you want to enable demographics?<br><a href=\"https://support.google.com/analytics/answer/2819948\" target=\"_blank\">support.google.com&hellip;</a>', '6', '20', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable Demographics', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_DEMOGRAPHICS', '-1', 'Do you want to enable demographics?<br><a href=\"https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingEcommerce\" target=\"_blank\">Click for Details;</a>', '6', '20', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable Ecommerce Tracking', 'ADDONS_CONNECTORS_" . strtoupper($this->_code) . "_ECOMMERCE_TRACKING', '-1', 'Do you want to enable Ecommerce tracking?<br><a href=\"https://support.google.com/analytics/answer/2819948\" target=\"_blank\">support.google.com&hellip;</a>', '6', '20', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
   }
  /**
   * Return the configuration parameter keys an an array
@@ -118,7 +119,8 @@ class Google_Analytics_with_Demographics extends lC_Addon { // your addon must e
   public function getKeys() {
     if (!isset($this->_keys)) {
       $this->_keys = array(	'ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_STATUS',
-	  						'ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_ACCOUNT',
+                'ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_ACCOUNT',
+	  						'ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_ECOMMERCE_TRACKING',
                 'ADDONS_CONNECTORS_' . strtoupper($this->_code) . '_DEMOGRAPHICS'
                 );
     }

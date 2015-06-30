@@ -46,7 +46,7 @@ class Authnet_SIM_Payments extends lC_Addon { // your addon must extend lC_Addon
    /**
     * The addon version
     */     
-    $this->_version = '1.0.1';
+    $this->_version = '1.1.0';
    /**
     * The Loaded 7 core compatibility version
     */                         
@@ -85,6 +85,7 @@ class Authnet_SIM_Payments extends lC_Addon { // your addon must extend lC_Addon
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable AddOn', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_STATUS', '-1', 'Do you want to enable this addon?', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Login ID', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_LOGIN_ID', '', 'The Authorize.net account login ID.', '6', '0', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Transaction Key', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TRANSACTION_KEY', '', 'The transaction key obtained from the Merchant Interface.', '6', '0', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Transaction Type', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TRANSACTION_TYPE', 'Auth Capture', 'The transaction type.', '6', '0', 'lc_cfg_set_boolean_value(array(\'Auth Capture\', \'Auth Only\'))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('MD5 Hash Signature', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_MD5_HASH', '', 'The MD5 hash value to verify the results of a transaction.', '6', '0', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Credit Cards', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_ACCEPTED_TYPES', '', 'Accept these credit card types for this payment method.', '6', '0', 'lc_cfg_set_credit_cards_checkbox_field', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Verify With CVC', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_VERIFY_WITH_CVC', '1', 'Verify the credit card with the billing address with the Credit Card Verification Checknumber (CVC)?', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
@@ -107,6 +108,7 @@ class Authnet_SIM_Payments extends lC_Addon { // your addon must extend lC_Addon
       $this->_keys = array('ADDONS_PAYMENT_' . strtoupper($this->_code) . '_STATUS',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_LOGIN_ID',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TRANSACTION_KEY',
+                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TRANSACTION_TYPE',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_MD5_HASH',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_ACCEPTED_TYPES',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_VERIFY_WITH_CVC',

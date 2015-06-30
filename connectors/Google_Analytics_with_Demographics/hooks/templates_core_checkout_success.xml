@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>Add GA Ecommerce Tracking Code</id>
+  <version>1.0.0</version>
+  <vqmver>2.3.2</vqmver>
+  <author>Graith Internet</author>
+  <file name="templates/core/content/checkout/checkout_success.php">
+    <operation info="Add GA Ecommerce Tracking Code">
+      <search position="before"><![CDATA[$(document).ready(function() {]]></search>         
+      <add><![CDATA[<?php include_once(DIR_FS_CATALOG . 'addons/Google_Analytics_with_Demographics/modules/google_analytics_ecommerce_tracking.php');?>]]></add>
+    </operation>
+  </file> 
+</modification>
