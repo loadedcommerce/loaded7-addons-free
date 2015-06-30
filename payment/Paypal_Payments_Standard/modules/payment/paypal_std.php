@@ -1,6 +1,6 @@
 <?php
 /**  
-  $Id: cod.php v1.0 2013-01-01 datazen $
+  $Id: paypal_std.php v1.0 2013-01-01 datazen $
 
   Loaded Commerce, Innovative eCommerce Solutions
   http://www.loadedcommerce.com
@@ -190,31 +190,32 @@ class lC_Payment_paypal_std extends lC_Payment {
     // get the shipping amount
     $taxTotal       = 0;
     $shippingTotal  = 0;
-	$discount_amount_cart = 0; 
+  $discount_amount_cart = 0; 
     foreach ($lC_ShoppingCart->getOrderTotals() as $ot) {
       if ($ot['code'] == 'shipping') $shippingTotal = (float)$ot['value'];
       if ($ot['code'] == 'tax') $taxTotal = (float)$ot['value'];
-	  if ($ot['code'] == 'coupon') $discount_amount_cart = (float)$ot['value'];
+    //if ($ot['code'] == 'coupon') $discount_amount_cart = (float)$ot['value'];
+    if ($ot['code'] == 'coupon') $discount_amount_cart = lc_round($ot['value'],DECIMAL_PLACES);
     } 
 
     $shoppingcart_products = $lC_ShoppingCart->getProducts();
     $amount = $lC_Currencies->formatRaw($lC_ShoppingCart->getSubTotal(), $lC_Currencies->getCode());
-	$shippingtax = $lC_ShoppingCart->getShippingCost();
+  $shippingtax = $lC_ShoppingCart->getShippingCost();
 
-	if(ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_METHOD == 'Itemized') { 
+  if(ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_METHOD == 'Itemized') { 
       //$discount_amount_cart = 0;     
 
       $paypal_action_params = array(
         'upload' => sizeof($shoppingcart_products),
         'redirect_cmd' => '_cart',
-        'handling_cart' => $shippingTotal,
-        'discount_amount' => $discount_amount_cart
+        'handling_cart' => $shippingTotal
+        //'discount_amount' => $discount_amount_cart
         );
      
 
 
       $i = 1;
-	  //BOF shipping tax classes
+    //BOF shipping tax classes
 
       $taxClassID = $lC_ShoppingCart->_shipping_method['tax_class_id']; 
       $countryID = ($lC_ShoppingCart->getShippingAddress('country_id') != NULL) ? $lC_ShoppingCart->getShippingAddress('country_id') : STORE_COUNTRY;
@@ -228,13 +229,16 @@ class lC_Payment_paypal_std extends lC_Payment {
         $countryID = ($lC_ShoppingCart->getShippingAddress('country_id') != NULL) ? $lC_ShoppingCart->getShippingAddress('country_id') : STORE_COUNTRY;
         $zoneID = ($lC_ShoppingCart->getShippingAddress('zone_id') != NULL) ? $lC_ShoppingCart->getShippingAddress('zone_id') : STORE_ZONE;
         $taxRate = $lC_Tax->getTaxRate($taxClassID, $countryID, $zoneID);
-        $tax = $lC_Tax->calculate($products['price'], $taxRate);
+    
+        $finalPrice = (sizeof($shoppingcart_products) === $i)? $products['price'] - $discount_amount_cart:$products['price'];
+        $tax = $lC_Tax->calculate($finalPrice, $taxRate);
 
-		$paypal_shoppingcart_params = array(
+    $paypal_shoppingcart_params = array(
             'item_name_'.$i => $products['name'],
             'item_number_'.$i => $products['item_id'],
             'quantity_'.$i => $products['quantity'],
             'amount_'.$i => $lC_Currencies->formatRaw($products['price'], $lC_Currencies->getCode()),
+      'discount_amount_'.$i => (sizeof($shoppingcart_products) === $i)? $discount_amount_cart:'0',
             'tax_'.$i => (sizeof($shoppingcart_products) === $i)? $tax + $tax_shipping:$tax          
             );
 
@@ -266,8 +270,8 @@ class lC_Payment_paypal_std extends lC_Payment {
         'redirect_cmd' => '_xclick',
         'amount' => $amount,
         'shipping' => $shippingTotal,
-		'discount_amount' => $discount_amount_cart,
-		'tax' => '0.00',
+    'discount_amount' => $discount_amount_cart,
+    'tax' => '0.00',
         'item_number' => $item_number
         ); 
       $paypal_action_tax_params = array();
