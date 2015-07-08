@@ -235,12 +235,14 @@ class lC_Payment_certitrade extends lC_Payment {
     $cancelurl  = str_replace('&amp;','&',lc_href_link(FILENAME_CHECKOUT, 'cart&mode=cancel', 'AUTO', true, true, true));
     //$cancelurl  = str_replace('&amp;','&', $cancelurl);
 
+    // added for terms/invoicing override
+    $amount = (isset($_SESSION['this_payment']) && $_SESSION['this_payment'] > 0) ? $_SESSION['this_payment'] : $lC_ShoppingCart->getTotal();
     $data_array = array(      
       'md5key' => ADDONS_PAYMENT_CERTITRADE_MD5PROD,
       'merchantid' => ADDONS_PAYMENT_CERTITRADE_MERCHANTID,
       'rev' => 'E',
       'orderid' => $this->_order_id,
-      'amount' => $lC_ShoppingCart->getTotal(),
+      'amount' => $amount,
       'currency' => array_key_exists($lC_Currencies->getCode(),$this->_currency_array) ? $this->_currency_array[$lC_Currencies->getCode()] : '840',
       'retururl' => $retururl,
       'approveurl' => $approveurl,
