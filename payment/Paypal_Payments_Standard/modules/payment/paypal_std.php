@@ -1,6 +1,11 @@
 <?php
+<<<<<<< HEAD
+/**  
+  $Id: paypal_std.php v1.0 2013-01-01 datazen $
+=======
   /**  
   $Id: cod.php v1.0 2013-01-01 datazen $
+>>>>>>> e7a728f957e9d1758aa666b28512f4f60647c69c
 
   Loaded Commerce, Innovative eCommerce Solutions
   http://www.loadedcommerce.com
@@ -123,6 +128,49 @@
     }
 
 
+<<<<<<< HEAD
+   /**
+  * Return the confirmation button logic
+  *
+  * @access public
+  * @return string
+  */ 
+  private function _paypal_standard_params() {
+    global $lC_Language, $lC_ShoppingCart, $lC_Currencies, $lC_Customer, $lC_Tax;  
+
+    $upload         = 0;
+    $no_shipping    = '1';
+    $redirect_cmd   = '';
+    $handling_cart  = '';
+    $item_name      = '';
+    $shipping       = '';
+
+    // get the shipping amount
+    $taxTotal       = 0;
+    $shippingTotal  = 0;
+  $discount_amount_cart = 0; 
+    foreach ($lC_ShoppingCart->getOrderTotals() as $ot) {
+      if ($ot['code'] == 'shipping') $shippingTotal = (float)$ot['value'];
+      if ($ot['code'] == 'tax') $taxTotal = (float)$ot['value'];
+    //if ($ot['code'] == 'coupon') $discount_amount_cart = (float)$ot['value'];
+    if ($ot['code'] == 'coupon') $discount_amount_cart = lc_round($ot['value'],DECIMAL_PLACES);
+    } 
+
+    $shoppingcart_products = $lC_ShoppingCart->getProducts();
+    $amount = $lC_Currencies->formatRaw($lC_ShoppingCart->getSubTotal(), $lC_Currencies->getCode());
+  $shippingtax = $lC_ShoppingCart->getShippingCost();
+
+  if(ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_METHOD == 'Itemized') { 
+      //$discount_amount_cart = 0;     
+
+      $paypal_action_params = array(
+        'upload' => sizeof($shoppingcart_products),
+        'redirect_cmd' => '_cart',
+        'handling_cart' => $shippingTotal
+        //'discount_amount' => $discount_amount_cart
+        );
+     
+=======
     /**
     * Perform any pre-confirmation logic
     *
@@ -167,10 +215,15 @@
       $_SESSION['cartSync']['orderID'] = $order_id;
 
       echo $this->_paypal_standard_params();        
+>>>>>>> e7a728f957e9d1758aa666b28512f4f60647c69c
 
       return false;
     }
 
+<<<<<<< HEAD
+      $i = 1;
+    //BOF shipping tax classes
+=======
     /**
     * Return the confirmation button logic
     *
@@ -211,6 +264,7 @@
           'handling_cart' => $shippingTotal,
           'discount_amount' => $discount_amount_cart
         );
+>>>>>>> e7a728f957e9d1758aa666b28512f4f60647c69c
 
         $i = 1;
         //BOF shipping tax classes
@@ -219,6 +273,13 @@
         $countryID = ($lC_ShoppingCart->getShippingAddress('country_id') != NULL) ? $lC_ShoppingCart->getShippingAddress('country_id') : STORE_COUNTRY;
         $zoneID = ($lC_ShoppingCart->getShippingAddress('zone_id') != NULL) ? $lC_ShoppingCart->getShippingAddress('zone_id') : STORE_ZONE;
         $taxRate = $lC_Tax->getTaxRate($taxClassID, $countryID, $zoneID);
+<<<<<<< HEAD
+    
+        $finalPrice = (sizeof($shoppingcart_products) === $i)? $products['price'] - $discount_amount_cart:$products['price'];
+        $tax = $lC_Tax->calculate($finalPrice, $taxRate);
+
+    $paypal_shoppingcart_params = array(
+=======
 
         $tax_shipping = $lC_Tax->calculate($shippingTotal, $taxRate);
         //EOF shipping tax classes
@@ -230,10 +291,12 @@
           $tax = $lC_Tax->calculate($products['price'], $taxRate);
 
           $paypal_shoppingcart_params = array(
+>>>>>>> e7a728f957e9d1758aa666b28512f4f60647c69c
             'item_name_'.$i => $products['name'],
             'item_number_'.$i => $products['item_id'],
             'quantity_'.$i => $products['quantity'],
             'amount_'.$i => $lC_Currencies->formatRaw($products['price'], $lC_Currencies->getCode()),
+      'discount_amount_'.$i => (sizeof($shoppingcart_products) === $i)? $discount_amount_cart:'0',
             'tax_'.$i => (sizeof($shoppingcart_products) === $i)? $tax + $tax_shipping:$tax          
           );
 
@@ -254,6 +317,27 @@
           $i++;
         }
 
+<<<<<<< HEAD
+        $paypal_action_params = array_merge($paypal_action_params,$paypal_shoppingcart_params);
+        
+        $i++;
+      }
+      
+    } else {
+      $item_number = '';
+      for ($i=1; $i<=sizeof($shoppingcart_products); $i++) {
+        $item_number .= ' '.$shoppingcart_products[$i]['name'].' ,';
+      }
+      $item_number = substr_replace($item_number,'',-2);
+      $paypal_action_params = array(
+        'item_name' => STORE_NAME,
+        'redirect_cmd' => '_xclick',
+        'amount' => $amount,
+        'shipping' => $shippingTotal,
+    'discount_amount' => $discount_amount_cart,
+    'tax' => '0.00',
+        'item_number' => $item_number
+=======
       } else {
         $item_number = '';
         for ($i=1; $i<=sizeof($shoppingcart_products); $i++) {
@@ -268,6 +352,7 @@
           'discount_amount' => $discount_amount_cart,
           'tax' => '0.00',
           'item_number' => $item_number
+>>>>>>> e7a728f957e9d1758aa666b28512f4f60647c69c
         ); 
         $paypal_action_tax_params = array();
         foreach ($lC_ShoppingCart->getOrderTotals() as $module) {
