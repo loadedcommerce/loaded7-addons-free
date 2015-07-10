@@ -219,7 +219,7 @@ class lC_Payment_paypal_std extends lC_Payment {
        for ($i=1; $i<=sizeof($shoppingcart_products); $i++) {
           $paypal_shoppingcart_params = array(
             'item_name_'.$i => $shoppingcart_products[$i]['name'],
-            'item_number_'.$i => $shoppingcart_products[$i]['item_id'],
+            'item_number_'.$i => $shoppingcart_products[$i]['id'],
             'quantity_'.$i => $shoppingcart_products[$i]['quantity'],
             'amount_'.$i => $lC_Currencies->formatRaw($shoppingcart_products[$i]['price'], $lC_Currencies->getCode()),
             'tax_'.$i => $shoppingcart_products[$i]['tax_class_id']            
@@ -240,7 +240,7 @@ class lC_Payment_paypal_std extends lC_Payment {
     } else {
       $item_number = '';
       for ($i=1; $i<=sizeof($shoppingcart_products); $i++) {
-        $item_number .= ' '.$shoppingcart_products[$i]['item_id'].' ,';
+        $item_number .= ' '.$shoppingcart_products[$i]['id'].' ,';
       }
       $item_number = substr_replace($item_number,'',-2);
       $paypal_action_params = array(
@@ -278,7 +278,7 @@ class lC_Payment_paypal_std extends lC_Payment {
         'address1' => $lC_ShoppingCart->getBillingAddress('street_address'),
         'address2' => '',
         'city' => $lC_ShoppingCart->getBillingAddress('city'), 
-        'state' => $lC_ShoppingCart->getBillingAddress('state'), 
+        'state' => lC_Address::getZoneCode($lC_ShoppingCart->getBillingAddress('zone_id')), 
         'zip' => $lC_ShoppingCart->getBillingAddress('postcode'),
         'lc' => $lC_ShoppingCart->getBillingAddress('country_iso_code_3'),
         'no_note' => (ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_NO_NOTE == 'Yes') ? '0': '1',    
