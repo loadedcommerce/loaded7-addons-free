@@ -24,7 +24,7 @@ require($lC_Vqmod->modCheck(DIR_FS_CATALOG . 'addons/Paypal_Payments_Standard/ip
 $listener = new IpnListener();
 
 // testing your IPN in sandbox/live mode.
-$listener->use_sandbox = ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_TEST_MODE;
+$listener->use_sandbox = (ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_TEST_MODE == '1')?true:false;
 
 try {
     $listener->requirePostMethod();
@@ -52,11 +52,14 @@ if ($verified) {
   switch ($paymentStatus ) {
     case 'Completed':
       //Check that $_POST['payment_amount'] and $_POST['payment_currency'] are correct
+      /*
       if($listener->validPayment($amount,$currency)) {      
         $_order_status = ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_ORDER_DEFAULT_STATUS_ID;
       } else {
         $_order_status = ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_ORDER_ONHOLD_STATUS_ID;
       }
+      */
+      $_order_status = ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_ORDER_DEFAULT_STATUS_ID;
       break;
     case 'Pending':       
     case 'Failed':
