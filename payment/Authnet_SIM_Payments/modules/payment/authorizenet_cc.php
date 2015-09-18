@@ -87,42 +87,6 @@ class lC_Payment_authorizenet_cc extends lC_Payment {
     }
   }
 
-  public function customCss(){
-    $cssString = '<style type=\'text/css\' media=\'all\'>
-                    BODY {color: #544F4B;}
-                    .Page {border: #828282 0px solid; padding: 5px; width:465px; text-align:left; margin-left:auto; margin-right:auto;}
-                    #divTestMode, #tableOrderInformation, #divOrderDetailsTop, #divOrderDescr, #tableLineItems, .HrLineItem, #divOrderDetailsBottom { display: none; }
-                    #btnSubmit{ color:#fff; font-size:14px; font-weight:bold; padding:8px 14px; background:#873b7a !important; border:0px; line-height:100%; cursor:pointer; vertical-align:middle;}
-                    #btnSubmit:hover { background-color: #bf58ad !important; box-shadow: 0 0 0 #FFFFFF inset, 0 2px 1px rgba(204, 204, 204, 0.9); }
-                    .HorizontalLine {  background-color: #E7DED5;  height: 1px;}
-                    HR { border: 0px; border-top: 1px solid #E7DED5; height: 1px;}
-                    HR.HrTop {border-top-color: #E7DED5;}
-                    HR.HrLineItem {border-top-color: #E7DED5;}
-                    .SectionHeadingBorder { margin-top: 15px; margin-bottom: 5px; border-bottom: #E7DED5 1px solid; width: 100%; }
-                    .GrayBoxOuter { background-color: #FFFFFF; color: #544F4B;} 
-                    .GrayBox { border: none; padding: 10px; } 
-                    .LabelColCC { width: 20%; }
-                    .DataColCC { width: 74%; }
-                    #checkoutConfirmationDetails { width:99%; }
-                    #tableCreditCardInformation TD { padding-left:10px; }
-                    #tablePaymentMethodHeading TD { padding-bottom:10px; }
-                    #divMerchantHeader { display:none; } 
-                    #divBillingInformation { display:none; } 
-                    #divShippingInformation { display:none; }
-                    #hrDescriptionAfter { display:none; }
-                    #hrButtonsBefore { display:none; }
-                    @media only screen and (max-width: 479px) {
-                      .LabelColCC { display:none; }
-                      #tdSubmit { width:100%; text-align:left }
-                    }
-                  </style>';
-
-    // for IE we cannot send css in the post or it wil cause a XSS error
-    if (isset($_SESSION['browserName']) && $_SESSION['browserName'] == 'msie') $cssString = '';
-                      
-    return $cssString;
-  }
-
   public function getJavascriptBlock() {
     return false;
   }
@@ -145,41 +109,47 @@ class lC_Payment_authorizenet_cc extends lC_Payment {
 
   public function process_button() {
     global $lC_Database, $lC_Session, $lC_MessageStack, $lC_Customer, $lC_Language, $lC_Currencies, $lC_ShoppingCart, $lC_CreditCard;
-    // $url = 'process&'.session_name().'='.session_id();
     
     $order_id = lC_Order::insert();
     
     $type = (defined('ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TYPE') && ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TYPE == 'Auth Only') ? 'AUTH_ONLY' : 'AUTH_CAPTURE';
 
-    $process_button_string = $this->_InsertFP(ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_LOGIN_ID, ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_KEY, $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal()),rand(1, 1000), $lC_Currencies->getCode());
+    $params = array('x_login' => ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_LOGIN_ID,
+                    'x_version' => '3.1',
+                    'x_show_form' => 'PAYMENT_FORM',
+                    'x_delim_data' => 'FALSE',
+                    'x_relay_response' => 'TRUE',
+                    'x_relay_url' => lc_href_link(FILENAME_IREDIRECT, '', 'SSL', true, true, true),
+                    'x_first_name' => $lC_ShoppingCart->getBillingAddress('firstname'),
+                    'x_last_name' => $lC_ShoppingCart->getBillingAddress('lastname'),
+                    'x_company' => $lC_ShoppingCart->getBillingAddress('company'),
+                    'x_address' => $lC_ShoppingCart->getBillingAddress('street_address'),
+                    'x_city' => $lC_ShoppingCart->getBillingAddress('city'),
+                    'x_state' => $lC_ShoppingCart->getBillingAddress('state'),
+                    'x_zip' => $lC_ShoppingCart->getBillingAddress('postcode'),
+                    'x_country' => $lC_ShoppingCart->getBillingAddress('country_iso_code_2'),
+                    'x_phone' => $lC_ShoppingCart->getBillingAddress('telephone_number'),
+                    'x_cust_id' => $lC_Customer->getID(),
+                    'x_customer_ip' => lc_get_ip_address(),
+                    'x_email' => $lC_Customer->getEmailAddress(),
+                    'x_description' => substr(STORE_NAME, 0, 255),
+                    'x_amount' => $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()),
+                    'x_currency_code' => $lC_Currencies->getCode(),
+                    'x_method' => 'CC',
+                    'x_type' => $type,
+                    'x_freight' => $lC_Currencies->formatRaw($lC_ShoppingCart->getShippingMethod('cost'), $lC_Currencies->getCode()),
+                    'x_cancel_url' => lc_href_link(FILENAME_CHECKOUT, '', 'NONSSL', true, true, true),
+                    'x_ship_to_first_name' => $lC_ShoppingCart->getShippingAddress('firstname'),
+                    'x_ship_to_last_name' => $lC_ShoppingCart->getShippingAddress('lastname'),
+                    'x_ship_to_company'  => $lC_ShoppingCart->getShippingAddress('company'),   
+                    'x_ship_to_address'  => $lC_ShoppingCart->getShippingAddress('street_address'),
+                    'x_ship_to_city'  => $lC_ShoppingCart->getShippingAddress('city'),      
+                    'x_ship_to_state' => $lC_ShoppingCart->getShippingAddress('state'),
+                    'x_ship_to_zip' => $lC_ShoppingCart->getShippingAddress('postcode'),        
+                    'x_ship_to_country' => $lC_ShoppingCart->getShippingAddress('country_iso_code_2'));
 
-    $process_button_string .= lc_draw_hidden_field('x_login', ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_LOGIN_ID) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_version', '3.1') . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_show_form', 'PAYMENT_FORM') . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_relay_response', 'TRUE') . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_type', $type) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_relay_url', lc_href_link(FILENAME_IREDIRECT, '', 'NONSSL', true, true, true)) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_header_html_payment_form', $this->customCss()) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_first_name', $lC_ShoppingCart->getBillingAddress('firstname')) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_last_name', $lC_ShoppingCart->getBillingAddress('lastname')) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_company', $lC_ShoppingCart->getBillingAddress('company')) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_address', $lC_ShoppingCart->getBillingAddress('street_address')) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_city', $lC_ShoppingCart->getBillingAddress('city')) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_state', $lC_ShoppingCart->getBillingAddress('state')) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_zip', $lC_ShoppingCart->getBillingAddress('postcode')) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_country', $lC_ShoppingCart->getBillingAddress('country_iso_code_2')) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_phone', $lC_Customer->getTelephone()) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_cust_id', $lC_Customer->getID()) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_customer_ip', lc_get_ip_address()) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_email', $lC_Customer->getEmailAddress()) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_description', substr(STORE_NAME, 0, 255)) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_email', $lC_Customer->getEmailAddress()) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_amount', $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode())) . "\n"; 
-    $process_button_string .= lc_draw_hidden_field('x_currency_code', $lC_Currencies->getCode()) . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_method', 'CC') . "\n";
-    $process_button_string .= lc_draw_hidden_field('x_invoice_num', $order_id) . "\n";
-    //$process_button_string .= lc_draw_hidden_field($lC_Session->getName(), $lC_Session->getID()) . "\n";
-    
+    $process_button_string = $this->_InsertFP(ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_LOGIN_ID, ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_KEY, $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal()),rand(1, 1000), $lC_Currencies->getCode());
+   
     $i = 0;
     foreach ($lC_ShoppingCart->getProducts() as $product) {
       $process_button_string .= lc_draw_hidden_field('x_line_item', ($i+1) . '<|>' . substr($product['name'], 0, 31) . '<|>' . substr($product['name'], 0, 255) . '<|>' . $product['quantity'] . '<|>' . $product['price'] . '<|>' . ($product['tax_class_id'] > 0 ? 'YES' : 'NO')) . "\n";
@@ -189,6 +159,9 @@ class lC_Payment_authorizenet_cc extends lC_Payment {
     if (ADDONS_PAYMENT_AUTHNET_SIM_PAYMENTS_TRANSACTION_TEST_MODE == '1') {
       $process_button_string .= lc_draw_hidden_field('x_test_request', 'TRUE');
     }
+      foreach ( $params as $key => $value ) {
+        $process_button_string .= lc_draw_hidden_field($key, $value) . "\n";
+      }
 
     return $process_button_string;
   }
