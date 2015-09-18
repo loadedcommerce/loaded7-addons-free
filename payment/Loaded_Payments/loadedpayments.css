@@ -1,22 +1,22 @@
 /* CSS BROWSER RESET
 ------------------------------------------- */
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td
-{ margin: 0; padding: 0; border: 0; outline: 0; font-weight: inherit; font-style: inherit; font-size: 100%; font-family: inherit; vertical-align: baseline; }
+{ margin: 0; padding: 0; border: 0; outline: 0; font-weight: inherit; font-style: inherit; font-size: 100%; font-family: arial; vertical-align: baseline; }
 
 /* remember to define focus styles! */
-body.bodyStyle { margin: 5px; margin-top: 0px; font-family: Arial, Arial, Helvetica, sans-serif; background: transparent; }
+body.bodyStyle { margin: 5px; margin-top: 0px; background: transparent; }
 ol, ul { list-style: none; }
 
 /* Default style for controls input ,select */
-input, select { padding: 3px; border-style: solid; border-width: 1px; border-color: #abadb3; font: 12px Arial, Helvetica, sans-serif; float: left; }
+input, select { display: block; width: 99; height: 24px; padding: 2px 4px; font-size: 14px; line-height: 1.42857143; color: #555; background-color: #fff; background-image: none; border: 1px solid #ccc; border-radius: 4px; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075); box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075); -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s; transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s; }
 select { background-image: none; }
 #ccType { display: none; }
 #PaymentTypeCC { margin-bottom: 10px; }
-input:focus { border: 1px solid #66afe9; outline: medium none; }
+input:focus { border-color: #66afe9; outline: 0; -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6); box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6); }
 
-input.button { cursor: pointer; width: 90px !important; background-image: none !important; }
-#btnPayment { background-color: #5cb85c !important; color: #FFF; }
-#btnCancel { }
+input.button { display: inline-block; padding: 6px 12px; margin-bottom: 0; font-size: 14px; font-weight: normal; line-height: 1.42857143; text-align: center; white-space: nowrap; vertical-align: middle; cursor: pointer; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-image: none; border: 1px solid transparent; border-radius: 4px; }
+#btnPayment { color: #FFF; background-color: #428BCA; border-color: #357EBD; padding: 0px 12px; }
+#btnCancel { padding: 0px 12px; border: 1px solid #ccc; }
 
 fieldset li, fieldset p { font-size: 14px; }
 .subsection-header { border-bottom: dotted 1px #ccc; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding-bottom: 5px; margin-top: 15px; display: block; }
