@@ -59,8 +59,8 @@ class lC_Payment_paypal_std extends lC_Payment {
   public function initialize() {
     global $lC_Database, $lC_Language, $order;
 
-    if ((int)ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_ORDER_STATUS_ID > 0) {
-      $this->order_status = ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_ORDER_STATUS_ID;
+    if ((int)ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_PROCESSING_STATUS_ID > 0) {
+      $this->order_status = ADDONS_PAYMENT_PAYPAL_PAYMENTS_STANDARD_PROCESSING_STATUS_ID;
     } else {
       $this->order_status = 0;
     } 
@@ -216,37 +216,49 @@ class lC_Payment_paypal_std extends lC_Payment {
         'handling_cart' => $shippingTotal,
         'discount_amount' => $discount_amount_cart
         );
-       for ($i=1; $i<=sizeof($shoppingcart_products); $i++) {
+       $i=1;
+       //echo '<pre>';
+       //print_r($shoppingcart_products);
+       foreach($shoppingcart_products as $products_key=>$indv_products_val) {
           $paypal_shoppingcart_params = array(
-            'item_name_'.$i => $shoppingcart_products[$i]['name'],
-            'item_number_'.$i => $shoppingcart_products[$i]['id'],
-            'quantity_'.$i => $shoppingcart_products[$i]['quantity'],
-            'amount_'.$i => $lC_Currencies->formatRaw($shoppingcart_products[$i]['price'], $lC_Currencies->getCode()),
-            'tax_'.$i => $shoppingcart_products[$i]['tax_class_id']            
+            'item_name_'.$i => $indv_products_val['name'],
+            'item_number_'.$i => $indv_products_val['id'],
+            'quantity_'.$i => $indv_products_val['quantity'],
+            'amount_'.$i => $lC_Currencies->formatRaw($indv_products_val['price'], $lC_Currencies->getCode()),
+            'tax_'.$i => number_format($indv_products_val['tax_amount'], 2)
             ); 
                    
         //Customer Specified Product Options: PayPal Max = 2
-        if($shoppingcart_products[$i]['variants']) {
-          for ($j=0, $n=sizeof($shoppingcart_products[$i]['variants']); $j<2; $j++) {
+        if($indv_products_val['variants']) {
+          for ($j=0, $n=sizeof($indv_products_val['variants']); $j<2; $j++) {
             $paypal_shoppingcart_variants_params = array(
-                'on'.$j.'_'.$i => $shoppingcart_products[$i]['variants'][$j]['group_title'],
-                'os'.$j.'_'.$i => $shoppingcart_products[$i]['variants'][$j]['value_title']          
+                'on'.$j.'_'.$i => $indv_products_val['variants'][$j]['group_title'],
+                'os'.$j.'_'.$i => $indv_products_val['variants'][$j]['value_title']          
                 ); 
             $paypal_shoppingcart_params =  array_merge($paypal_shoppingcart_params,$paypal_shoppingcart_variants_params);
           }
         }
         $paypal_action_params = array_merge($paypal_action_params,$paypal_shoppingcart_params);
+      	$i++;
       }
     } else {
       $item_number = '';
       for ($i=1; $i<=sizeof($shoppingcart_products); $i++) {
         $item_number .= ' '.$shoppingcart_products[$i]['id'].' ,';
       }
+      $order_total_modules = $lC_ShoppingCart->getOrderTotals();
+      $tax_amount = 0;
+      foreach($order_total_modules as $otmod)
+      {
+      	if($otmod['code'] == 'tax')
+      		$tax_amount = number_format($otmod['value'], 2);
+      }
       $item_number = substr_replace($item_number,'',-2);
       $paypal_action_params = array(
         'item_name' => STORE_NAME,
         'redirect_cmd' => '_xclick',
         'amount' => $amount,
+        'tax' => $tax_amount,
         'shipping' => $shippingTotal,
         'discount_amount' => $discount_amount_cart,
         'item_number' => $item_number

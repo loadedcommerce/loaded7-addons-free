@@ -12,8 +12,7 @@
           // https://support.google.com/analytics/answer/2444872
 ?>
 
-<!-- Graith Google Analytics code added -->
-<!-- Google Analytics -->
+<!-- Google Analytics with Demographics -->
 <script>
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -24,16 +23,13 @@ ga('create', '<?php echo ADDONS_CONNECTORS_GOOGLE_ANALYTICS_WITH_DEMOGRAPHICS_AC
 ga('send', 'pageview');
 
 </script>
-<!-- End Google Analytics -->
-<!-- EOF Graith Google Analytics code added -->
+<!-- End Google Analytics with Demographics -->   
 
 <?php
         } else { // GA without Demographics
           // https://developers.google.com/analytics/devguides/collection/analyticsjs/
 ?>
 
-
-<!-- Graith Google Analytics code added -->
 <!-- Google Analytics -->
 <script>
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -46,8 +42,6 @@ ga('send', 'pageview');
 
 </script>
 <!-- End Google Analytics -->
-<!-- EOF Graith Google Analytics code added -->
-
 <?php        
         } 
         
