@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>After VQMOD-002, add localization code</id>
+  <version>1.0.0</version>
+  <vqmver>2.3.2</vqmver>
+  <author>loadedcommerce.com</author>
+  <file name="templates/l7p_spareparts_blue/content/checkout/shopping_cart.php">
+    <operation info="After , add localization code">
+      <search position="after"><![CDATA[
+         foreach ($lC_ShoppingCart->getOrderTotals() as $module) {   
+      ]]></search>        
+      <add><![CDATA[
+	$special_shipping = explode(' ',$module['title']);
+		$found = $special_shipping[0];
+		
+		if($found == 'Special'){
+			$module['text'] = '-' ; 
+		}
+		
+      ]]></add>
+    </operation>
+	
+  </file>   
+</modification>
+
