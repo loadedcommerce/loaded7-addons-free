@@ -7,8 +7,12 @@
   @license    https://github.com/loadedcommerce/loaded7/blob/master/LICENSE.txt
   @version    $Id: wpcallback.php v1.0 2013-08-08 datazen $
 */
+global $lC_Vqmod, $lC_Language;
+
 require('../../includes/application_top.php');
 require_once($lC_Vqmod->modCheck(DIR_FS_CATALOG . 'includes/classes/order.php'));
+
+$lC_Language->load('checkout');
 
 function meta_redirect($url){
   echo '<meta http-equiv="refresh" content="0;url='.$url.'">';

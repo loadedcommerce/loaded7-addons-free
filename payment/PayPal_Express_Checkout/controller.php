@@ -45,7 +45,7 @@ class Paypal_Express_Checkout extends lC_Addon { // your addon must extend lC_Ad
    /**
     * The addon version
     */     
-    $this->_version = '1.0.2';
+    $this->_version = '1.0.4';
    /**
     * The Loaded 7 core compatibility version
     */     

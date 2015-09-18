@@ -45,7 +45,7 @@ class PayPal_Payments_Pro extends lC_Addon { // your addon must extend lC_Addon
    /**
     * The addon version
     */     
-    $this->_version = '1.0.1';
+    $this->_version = '1.0.2';
    /**
     * The Loaded 7 core compatibility version
     */     
@@ -86,6 +86,7 @@ class PayPal_Payments_Pro extends lC_Addon { // your addon must extend lC_Addon
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('API Password', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_API_PASSWORD', '', 'Enter your PayPal EC API Password.', '6', '0', now())");    
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('API Signature', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_API_SIGNATURE', '', 'Enter your PayPal EC API Signature.', '6', '0', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Transaction Type', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TRXTYPE', 'Sale', 'Set the transaction type; Authorization-Only or Sale (Authorize and Capture)', '6', '0', 'lc_cfg_set_boolean_value(array(\'Sale\', \'Authorization\'))', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable BML', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_BML_OPTION', '-1', 'Set to \'Yes\' for having Bill Me Later option while Checkout.', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Sandbox Mode', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TEST_MODE', '-1', 'Set to \'Yes\' for sandbox test environment or set to \'No\' for production environment.', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Merchant Country', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_MERCHANT_COUNTRY', 'US', 'The country of merchant', '6', '17', 'lc_cfg_set_boolean_value(array(\'US\', \'UK\'))', now())");    
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Credit Card Payments', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_DP_STATUS', '1', 'Do you want to accept payment by Credit Card?', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())"); 
@@ -114,6 +115,7 @@ class PayPal_Payments_Pro extends lC_Addon { // your addon must extend lC_Addon
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_API_PASSWORD',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_API_SIGNATURE',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TRXTYPE',
+                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_BML_OPTION',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TEST_MODE',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_MERCHANT_COUNTRY',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_ACCEPTED_TYPES',

@@ -49,7 +49,7 @@ class Paypal_Payflow_Pro extends lC_Addon { // your addon must extend lC_Addon
    /**
     * The addon version
     */     
-    $this->_version = '1.0.1';
+    $this->_version = '1.0.3';
    /**
     * The Loaded 7 core compatibility version
     */     
@@ -93,6 +93,7 @@ class Paypal_Payflow_Pro extends lC_Addon { // your addon must extend lC_Addon
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('User', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_USER', '', 'Enter your PayPal User Name.', '6', '0', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Password', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_PASSWORD', '', 'Enter your PayPal Password.', '6', '0', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Transaction Type', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TRXTYPE', 'Sale', 'Set the transaction type; Authorization-Only or Sale (Authorize and Capture)', '6', '0', 'lc_cfg_set_boolean_value(array(\'Sale\', \'Authorization\'))', now())");
+    $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Enable BML', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_BML_OPTION', '-1', 'Set to \'Yes\' for having Bill Me Later option while Checkout.', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Sandbox Mode', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_TEST_MODE', '-1', 'Set to \'Yes\' for sandbox test environment or set to \'No\' for production environment.', '6', '0', 'lc_cfg_use_get_boolean_value', 'lc_cfg_set_boolean_value(array(1, -1))', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '2', 'lc_cfg_use_get_zone_class_title', 'lc_cfg_set_zone_classes_pull_down_menu', now())");
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Set Pending Status', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_ORDER_STATUS_ID', '1', 'For Pending orders, set the status of orders made with this payment module to this value.', '6', '0', 'lc_cfg_use_get_order_status_title', 'lc_cfg_set_order_statuses_pull_down_menu', now())");
@@ -118,6 +119,7 @@ class Paypal_Payflow_Pro extends lC_Addon { // your addon must extend lC_Addon
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_USER',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_PASSWORD',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TRXTYPE',
+                           'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_BML_OPTION',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_TEST_MODE',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_ACCEPTED_CARDS',
                            'ADDONS_PAYMENT_' . strtoupper($this->_code) . '_ZONE',

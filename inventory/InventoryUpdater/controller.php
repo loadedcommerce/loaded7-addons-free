@@ -42,7 +42,7 @@ class InventoryUpdater extends lC_Addon { // your addon must extend lC_Addon
    /**
     * The addon version
     */     
-    $this->_version = '1.0.2'; 
+    $this->_version = '1.0.3'; 
    /**
     * The Loaded 7 core compatibility version
     */     
@@ -75,7 +75,7 @@ class InventoryUpdater extends lC_Addon { // your addon must extend lC_Addon
     global $lC_Database;
     
 	$file = __DIR__ .'/loaded7_automation.php';
-	$newfile = '/home/a441325/public_html/catalog/includes/loaded7_automation.php';
+	$newfile = DIR_FS_CATALOG.'loaded7_automation.php';
 	if (!copy($file, $newfile)) {
 		//FB::log(  "failed to copy $file...\n");
 	}

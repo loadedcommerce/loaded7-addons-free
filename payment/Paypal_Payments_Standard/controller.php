@@ -45,7 +45,7 @@ class Paypal_Payments_Standard extends lC_Addon { // your addon must extend lC_A
    /**
     * The addon version
     */     
-    $this->_version = '1.0.4';
+    $this->_version = '1.0.8';
    /**
     * The Loaded 7 core compatibility version
     */     
@@ -100,6 +100,10 @@ class Paypal_Payments_Standard extends lC_Addon { // your addon must extend lC_A
     $lC_Database->simpleQuery("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Return Behavior', 'ADDONS_PAYMENT_" . strtoupper($this->_code) . "_RM', '1', 'How should the customer be sent back from PayPal to the specified URL?<br>0=No IPN, 1=GET, 2=POST', '6', '25', 'lc_cfg_set_boolean_value(array(\'0\',\'1\',\'2\'))', now())"); 
 
     $lC_Database->simpleQuery("ALTER TABLE " . TABLE_ORDERS . " CHANGE payment_method payment_method VARCHAR( 512 ) NOT NULL");
+    
+    // set ipn.php perms to 0755
+    $path = DIR_FS_CATALOG . 'addons/Paypal_Payments_Standard/ipn.php';  
+    chmod($path, 0755);
   }
  /**
   * Return the configuration parameter keys an an array

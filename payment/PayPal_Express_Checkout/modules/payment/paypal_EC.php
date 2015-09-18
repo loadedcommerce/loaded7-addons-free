@@ -211,9 +211,11 @@ class lC_Payment_paypal_EC extends lC_Payment {
 
     if (isset($_SESSION['PPEC_TOKEN']) && $_SESSION['PPEC_TOKEN'] != NULL) {  // this is express checkout - goto ec process
 
-      if (isset($_GET['PayerID']) && $_GET['PayerID'] != NULL) {
-        $_SESSION['PPEC_PAYDATA']['TOKEN'] = $_GET['token'];
-        $_SESSION['PPEC_PAYDATA']['PAYERID'] = $_GET['PayerID'];
+      $url_parts = parse_url($_SERVER['REQUEST_URI']);    
+      $params = utility::nvp2arr($url_parts['query']);
+      if (isset($params['PayerID']) && $params['PayerID'] != NULL) {
+        $_SESSION['PPEC_PAYDATA']['TOKEN'] = $params['token'];
+        $_SESSION['PPEC_PAYDATA']['PAYERID'] = $params['PayerID'];
         if (!$this->_ec_process()) {
 
           unset($_SESSION['PPEC_TOKEN']);
@@ -222,7 +224,7 @@ class lC_Payment_paypal_EC extends lC_Payment {
           // ec step1 success
           unset($_SESSION['PPEC_TOKEN']);
           // set the skip payment flag
-          $_SESSION['SKIP_PAYMENT_PAGE'] = TRUE;          
+          $_SESSION['SKIP_PAYMENT_PAGE'] = TRUE;  
           lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'confirmation', 'SSL'));
         }
       } else { // customer clicked cancel      
@@ -238,7 +240,6 @@ class lC_Payment_paypal_EC extends lC_Payment {
       $result = (isset($_POST['RESULT']) && $_POST['RESULT'] != NULL) ? $_POST['RESULT'] : NULL;
       if (!isset($this->_order_id) || $this->_order_id == NULL) $this->_order_id = (isset($_POST['INVNUM']) && !empty($_POST['INVNUM'])) ? $_POST['INVNUM'] : $_POST['INVOICE'];
     }               
-
     $error = false;
     switch ($result) {
       case 'Success' :
@@ -479,6 +480,7 @@ class lC_Payment_paypal_EC extends lC_Payment {
     $postData = $this->_getUserParams('DoExpressCheckoutPayment') .  
                 "&PAYMENTACTION=" . $transType . 
                 "&BUTTONSOURCE=LoadedCommerce_Cart" .
+                "&PAYMENTREQUEST_0_CURRENCYCODE=" . $_SESSION['currency'] .
                 "&PAYMENTREQUEST_0_AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) .
                 "&TOKEN=" . $token . 
                 "&PAYERID=" . $payerID;
@@ -573,9 +575,9 @@ class lC_Payment_paypal_EC extends lC_Payment {
                 "&CANCELURL=" . urlencode(lc_href_link(FILENAME_CHECKOUT, 'process', 'SSL', true, true, true)) .
                 "&PAYMENTREQUEST_0_CURRENCYCODE=" . $_SESSION['currency'] .
                 "&PAYMENTREQUEST_0_AMT=" . $lC_Currencies->formatRaw($lC_ShoppingCart->getTotal(), $lC_Currencies->getCode()) . 
-                "&PAYMENTREQUEST_0_SHIPPINGAMT=" . $shippingTotal .
-                "&PAYMENTREQUEST_0_SHIPDISCAMT=" . (float)$discountTotal .
-                "&PAYMENTREQUEST_0_TAXAMT=" . (float)$taxTotal .
+                "&PAYMENTREQUEST_0_SHIPPINGAMT=" . $lC_Currencies->formatRaw($shippingTotal, $lC_Currencies->getCode()) .
+                "&PAYMENTREQUEST_0_SHIPDISCAMT=" . $lC_Currencies->formatRaw($discountTotal, $lC_Currencies->getCode()) .
+                "&PAYMENTREQUEST_0_TAXAMT=" . $lC_Currencies->formatRaw($taxTotal, $lC_Currencies->getCode()) .
                 "&PAYMENTREQUEST_0_SHIPTONAME=" . urlencode($lC_ShoppingCart->getShippingAddress('firstname') . " " . $lC_ShoppingCart->getShippingAddress('lastname')) . 
                 "&PAYMENTREQUEST_0_SHIPTOSTREET=" . urlencode($lC_ShoppingCart->getShippingAddress('street_address')) . 
                 "&PAYMENTREQUEST_0_SHIPTOCITY=" . urlencode($lC_ShoppingCart->getBillingAddress('city')) . 

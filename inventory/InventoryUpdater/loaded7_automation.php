@@ -1,85 +1,39 @@
 <?php
 //ini_set("display_errors", 1);
-//error_reporting(E_ALL);
-/*
-##########################################################################
-Loaded 7 Automation Script
-Author	Ravish Sharma
-Date	28-August-2013
-##########################################################################
-*/
-//*********************** CONFIGURATION VARIABLES	**********************
+//error_reporting(E_ERROR);
 
-if (File_exists(__DIR__ . '/config.php')) {
-  @require(__DIR__ . '/config.php');
-}
+//*********************** CONFIGURATION VARIABLES	*******************
+include("includes/config.php");
 
-$table_prefix = 'lc_';
+$table_prefix = DB_TABLE_PREFIX;
 define('CATEGORIES',  $table_prefix . "categories");
 define('CATEGORIES_DESCRIPTION',  $table_prefix . "categories_description");
+define('PRODUCTS_TO_CATEGORIES',  $table_prefix . "products_to_categories");
+define('MANUFACTURERS',  $table_prefix . "manufacturers");
+define('MANUFACTURERS_INFO',  $table_prefix . "manufacturers_info");
 define('PRODUCTS',  $table_prefix . "products");
-define('PRODUCTS_PRICES',  $table_prefix . "products_pricing");
-define('PRODUCTS_CATEGORIES',  $table_prefix . "products_to_categories");
-define('PRODUCTS_DESCRIPTIONS',  $table_prefix . "products_description");
-define('IMAGES',  $table_prefix . "products_images");
-define('IMAGES_LINKS',  $table_prefix . "products_images_groups");
-define('TAX_DESCRIPTIONS',  $table_prefix . "tax_class");
+define('PRODUCT_ATTRIBUTES',  $table_prefix . "product_attributes");
+define('PRODUCTS_DESCRIPTION',  $table_prefix . "products_description");
+define('PRODUCTS_IMAGES',  $table_prefix . "products_images");
+define('LANGUAGES',  $table_prefix . "languages");
+define('TAX_CLASS',  $table_prefix . "tax_class");
 
 $PassKey="02446";//This variable is used for authentication of xml file
 
-//**** Size of products_model in products table ****
-// set this to the size of your model number field in the db.  We check to make sure all models are no longer than this value.
-global $modelsize;
-$modelsize = 64;
+global $usercount;
+global $userdata;
+$usercount=0;
 
-//*******************	 END CONFIGURATION VARIABLES	******************************
-
-//***********************	 START INITIALIZATION	********************
-global $filelayout, $filelayout_count, $filelayout_sql, $langcode, $fileheaders, $tax_id;
-
-// these are the fields that will be defaulted to the current values in the database if they are not found in the incoming file
-global $default_these;
-$default_these = array(
-	'v_products_image',
-	'v_categories_id',
-	'v_products_price',
-	'v_products_quantity',
-	'v_products_weight',
-	'v_date_avail',
-	'v_instock',
-	'v_tax_class_title',
-	'v_manufacturers_name',
-	'v_manufacturers_id',
-	'v_products_dim_type',
-	'v_products_length',
-	'v_products_width',
-	'v_products_height',
-	'v_products_thumbnail'
-	);
-
-// making connection with the database.
-	$dbhandle = mysql_connect(DB_SERVER, DB_SERVER_USERNAME, DB_SERVER_PASSWORD)
-    or die("Unable to connect to MySQL");
-    $db_selected = mysql_select_db(DB_DATABASE,$dbhandle);	
-    
-//Get the tax class id
-	$tax = $_GET["tax"];
-	$query = "SELECT tax_class_id FROM  ".TAX_DESCRIPTIONS." where tax_class_id = '".$tax."'";
-	
-	$result = mysql_query($query);
-	$tax_id = @mysql_result($result,0);
-	
-	if($tax_id == ""){
-		echo "Check tax class";
-		exit(0);
-	}
-    
+$dbhandle = mysql_connect(DB_SERVER, DB_SERVER_USERNAME, DB_SERVER_PASSWORD)
+or die("Unable to connect to MySQL");
+$db_selected = mysql_select_db(DB_DATABASE,$dbhandle);	
+		
 //************************* END INITIALIZATION	**************************
 if(isset($_POST['XML_INPUT_VALUE']))
 {
 	$arr_xml = xml2php($_POST['XML_INPUT_VALUE']);
 	requestType($arr_xml,$PassKey);
-}else{
+} else{
 	echo "Xml request data needed to process this file";
 	die();
 }
@@ -160,16 +114,17 @@ function requestType($array_haystack,$PassKey)
 				}
 		case "productsimport":
 				{
-				ImportProduct($array_haystack);
+				ImportProduct($_POST['XML_INPUT_VALUE']);
 				break;		
 				}
 	}
+
 }
 
 function output_xml($content) 
 {
 	header("Content-Type: application/xml; charset=ISO-8859-1");
-	header("Expires: Mon, 26 Jul 2013 05:00:00 GMT");
+	header("Expires: Mon, 01 Jan 2014 05:00:00 GMT");
 	header("Last-Modified: ". gmdate("D, d M Y H:i:s") ." GMT");
 	header("Cache-Control: no-store, no-cache, must-revalidate");
 	header("Cache-Control: post-check=0, pre-check=0", false);
@@ -178,50 +133,40 @@ function output_xml($content)
 	
 }
 
-function GetProd($skuPrefixVal)
-{
+function GetProd($skuPrefixVal){
 	$likeSql = "";
-	if(isset($skuPrefixVal) && $skuPrefixVal != "")
-		$likeSql = " and p.products_model like '".$skuPrefixVal."%'";
-
-	$xml_str = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
-		
-	$sql_prod = "SELECT p.products_model as v_products_model, i.image as v_products_image, p.products_price as v_products_price, p.products_quantity as v_products_quantity, p.products_status as status
-	FROM ".PRODUCTS." AS p LEFT JOIN ".IMAGES." AS i ON i.products_id = p.products_id WHERE p.products_status = 1 ".$likeSql;
-	
-	$result = mysql_query($sql_prod);
-	
-	if($result === FALSE) {
-		die(mysql_error()); // TODO: better error handling
+	if(isset($skuPrefixVal) && $skuPrefixVal != "") {
+		$likeSql = "where p.products_model like '$skuPrefixVal%'";
 	}
-
+	$xml_str = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";	
+	$sql_prod = "select p.products_model as products_model, i.image as products_image, p.products_price as products_price, p.products_quantity as  products_quantity, p.products_status as products_status   
+				from ".PRODUCTS." as p left join ".PRODUCTS_IMAGES." as i on p.products_id = i.products_id  ".$likeSql;
+	$result = mysql_query($sql_prod);
 	$xml_str .= "<xmlPopulate>\n";
 	$xml_str .= "<xmlGetProductsResponse>\n";
 	$count=0;
 	$v_products_image = "&amp;";
 	
-	 while ($rowprod=mysql_fetch_array($result))
-	{//echo "test";
-		$v_products_image = "&amp;";
-		if($rowprod['v_products_image'] != ""){
-			$v_products_image = $rowprod['v_products_image'];
+	if($result != null){
+		while ($rowprod=mysql_fetch_array($result)){
+			$v_products_image = "&amp;";
+			if($rowprod['products_image'] != ""){
+				$v_products_image = $rowprod['products_image'];
+			}			
+			$xml_str .= "<xmlProduct>\n<v_products_model><![CDATA[".$rowprod['products_model']."]]></v_products_model>\n";
+			$xml_str .= "<v_products_image><![CDATA[".$v_products_image."]]></v_products_image>\n";
+			$xml_str .= "<v_products_quantity><![CDATA[".$rowprod['products_quantity']."]]></v_products_quantity>\n";
+			$xml_str .= "<v_products_status><![CDATA[".$rowprod['products_status']."]]></v_products_status>\n";
+			$xml_str .= "<v_products_price><![CDATA[".$rowprod['products_price']."]]></v_products_price>\n";
+			$xml_str .= "</xmlProduct>\n";
+			$count++;
 		}
-		
-		$xml_str .= "<xmlProduct>\n<v_products_model><![CDATA[".$rowprod['v_products_model']."]]></v_products_model>\n";
-		$xml_str .= "<v_products_image><![CDATA[".$v_products_image."]]></v_products_image>\n";
-		$xml_str .= "<v_products_quantity><![CDATA[".$rowprod['v_products_quantity']."]]></v_products_quantity>\n";
-		$xml_str .= "<v_products_status><![CDATA[".$rowprod['status']."]]></v_products_status>\n";
-		$xml_str .= "<v_products_price><![CDATA[".$rowprod['v_products_price']."]]></v_products_price>\n";
-		$xml_str .= "</xmlProduct>\n";
-		
-		$count++;
 	}
-	$xml_str.="</xmlGetProductsResponse>\n</xmlPopulate>";
-	output_xml($xml_str);
+	$xml_str .="</xmlGetProductsResponse>\n</xmlPopulate>";	
+	output_xml($xml_str);	
 }
 
-function Ping()
-{
+function Ping(){
 	$xml_str = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
 	$xml_str.="<xmlPopulateResponce>\n";
 	$Ping_res=mysql_connect(DB_SERVER, DB_SERVER_USERNAME, DB_SERVER_PASSWORD);
@@ -235,575 +180,370 @@ function Ping()
 	output_xml($xml_str);
 }
 
-function ImportProduct($array_haystack) 
-{
-	$itemArr=array();
+function ImportProduct($array_haystack) {
+	global $usercount;
+	global $userdata;
+	if (!($xml_parser = xml_parser_create())) die("Couldn't create parser.");
+	xml_set_element_handler( $xml_parser, "startElementHandler", "endElementHandler");
+	xml_set_character_data_handler( $xml_parser, "characterDataHandler");
+	xml_parse($xml_parser, $array_haystack);
+	xml_parser_free($xml_parser);
 	
-	global $xmlstr;
-	global $AllowedTags;
-	$AllowedTags=array();
-	$AllTags=array("v_products_model","v_products_image","v_products_name_1","v_products_description_1","v_products_price",
-	"v_products_weight","v_products_quantity","v_manufacturers_name","v_categories_name_1","v_categories_name_2",
-	"v_categories_name_3","v_status","v_products_thumbnail","v_products_length","v_products_width","v_products_height", "v_products_msrp");
-
-	foreach($array_haystack as $xml_key => $xml_value) 
-	{
-		if(in_array(strtolower($xml_value["tag"]),$AllTags))
-		{
-			if(!in_array(strtolower($xml_value["tag"]), $AllowedTags))
-			{
-				$AllowedTags[]=strtolower($xml_value["tag"]);
-			}
-
-		}
+	//Get the language id defaul language code=en_US	
+	$language = $_GET["language"];
+	$query = "select languages_id from ".LANGUAGES." where code = '".$language."'";
+	$result = mysql_query($query);
+	$lang = mysql_result($result,0);
+	if($lang == ""){
+		echo "Check language";
+		exit(0);
 	}
 	
-	$SizeArr=sizeof($AllowedTags);
-	if(!$AllowedTags |$SizeArr<=0)
-	{
-		$xmlstr="<xmlPopulate>\n<xmlProductsImportResponse>";
-		$xmlstr.="Error";
-		$xmlstr.="</xmlProductsImportResponse>\n</xmlPopulate>";
-		output_xml($xmlstr);
-		exit;
+	//Get the tax class id tax=Taxabloe Gods
+	$tax = $_GET["tax"];
+	$query = "select tax_class_id from ".TAX_CLASS." where tax_class_title = '".$tax."'";
+	$result = mysql_query($query);
+	$tax_class_id = mysql_result($result,0);
+	if($tax_class_id == ""){
+		echo "Check tax class";
+		exit(0);
 	}
-
-	if(in_array("v_products_model",$AllowedTags)==false)
-	{
-		$xmlstr="<xmlPopulate>\n<xmlProductsImportResponse>";
-		$xmlstr.="Error-Missing Model Number";
-		$xmlstr.="</xmlProductsImportResponse>\n</xmlPopulate>";
-		output_xml($xmlstr);
-		exit;
-	}
-	
-	// make single dimensional array for all the XML values.
-	if ((!empty($array_haystack)) AND (is_array($array_haystack))) 
-	{
-		$i=0;
-		foreach($array_haystack as $xml_key => $xml_value) 
-		{
-			if(in_array(strtolower($xml_value["tag"]),$AllowedTags))
-			{
-				if($i != 0 && strtolower($xml_value["tag"]) == 'v_products_model')
-				{
-					$itemArr[$i]='zzzzzPRODUCTBREAKzzzzz';
-					$i++;
-					$itemArr[$i]=$xml_value["value"];
-					$i++;
-				}else{
-					$itemArr[$i]=$xml_value["value"];
-					$i++;
-				}
-			}
-		}
-	}
-
-	// make 2D array for all the XML values with product wise information.
-	$i=0; $j=0;
-	foreach($itemArr as $xml_value) 
-	{
-		if( $xml_value != 'zzzzzPRODUCTBREAKzzzzz')
-		{
-			$arrnew[$i][$j] = $xml_value;
-			$j++;
-			continue;
-		}
-		$j = 0;
-		$i++;
+	// updates, msrp and add manufacture in title 
+	// send true in market url if want to update.
+	$msrpUpdate = "";
+	$manfInTitle = "";
+	if(isset($_GET["msrp"]))
+		$msrpUpdate = $_GET["msrp"];
+	if(isset($_GET["manuftitle"]))
+		$manfInTitle = $_GET["manuftitle"];
+		
+	$selectSkus = "select products_id, products_model from ".PRODUCTS;
+	$result = mysql_query($selectSkus);
+	$skus = array();
+	// Creating the array of "products_id" with "sku" as index
+	while($sku_arr = mysql_fetch_array($result)){
+		$skus[mysql_real_escape_string($sku_arr["products_model"])]=$sku_arr["products_id"] ; //products_model is sku
 	}
 	
-	$lll = 0;
-	global $filelayout;
-	$filelayout = array();
-	foreach( $AllowedTags as $header )
-	{
-		$cleanheader = str_replace( '"', '', $header);
-		$filelayout[$cleanheader] = $lll++;
-	}
-
-	$newreaded = "";
 	$xmlstr="<xmlPopulate>\n<xmlProductsImportResponse>\n";
-	for($v=0;$v<sizeof($arrnew);$v++)
-	{
-		$TempArr=array();
-		foreach($arrnew[$v] as $bb)
-		{
-			$TempArr[]=$bb;
+	//iterating through all the skus that came in the xml request
+	for($i = 0; $i < $usercount; $i++){
+		$xmlstr.="<xmlProductImport>";
+		$userdata[$i]["tax_class_id"] = $tax_class_id;	
+		if(strcasecmp($userdata[$i]["status"], "InActive") == 0) 
+			$userdata[$i]["status"] = 0;
+		elseif(strcasecmp($userdata[$i]["status"], "Active") == 0) 
+			$userdata[$i]["status"] = 1;	
+	
+		$xmlstr.="<v_products_model>" . $userdata[$i]["sku"] . "</v_products_model>\n"; 
+		$image = "";
+		
+		if(isset($userdata[$i]["image"])){
+			if($userdata[$i]["image"] != ""){
+				//Calculate image location
+				$productPath = "images/products/product_info/".basename($userdata[$i]["image"]);	
+				$thumbnanilsPath = "images/products/thumbnails/".basename($userdata[$i]["image"]);
+				$popupPath = "images/products/popup/".basename($userdata[$i]["image"]);
+				$originalsPath = "images/products/originals/".basename($userdata[$i]["image"]);
+				$miniPath = "images/products/mini/".basename($userdata[$i]["image"]);
+				$largePath = "images/products/large/".basename($userdata[$i]["image"]);
+						
+				$file = file_get_contents($userdata[$i]["image"]);
+				file_put_contents($productPath,$file);
+				file_put_contents($thumbnanilsPath,$file);
+				file_put_contents($popupPath,$file);
+				file_put_contents($originalsPath,$file);
+				file_put_contents($miniPath,$file);
+				file_put_contents($largePath,$file);
+				$image = basename($userdata[$i]["image"]);
+			}
 		}
-		walk($TempArr);
-	}
+		$cat1 = "";
+		$cat2 = "";
+		$cat3 = "";
+		if(isset($userdata[$i]["categories_1"]))
+			$cat1 = trim($userdata[$i]["categories_1"]);
+		if(isset($userdata[$i]["categories_2"]))
+			$cat2 = trim($userdata[$i]["categories_2"]);
+		if(isset($userdata[$i]["categories_3"]))
+			$cat3 = trim($userdata[$i]["categories_3"]);
+			
+		if($userdata[$i]["sku"] != '') {
+			//If sku already exists in the DB then its an update else its a new product				
+				
+			if(array_key_exists($userdata[$i]["sku"],$skus))  {
+				$xmlstr.="<v_status>UPDATE</v_status>\n";
+				$update_pid =  $skus[$userdata[$i]["sku"]];
+				// full update
+				if($userdata[$i]["tag_count"] > 9){
+					if($manfInTitle == 'yes'){
+						if($userdata[$i]["manufacturer"] != '')
+							$userdata[$i]["name"] = $userdata[$i]["manufacturer"]." - ". $userdata[$i]["name"];
+					}	
+					$mnfid = 0;
+					if($userdata[$i]["manufacturer"] != '')
+						$mnfid = getManufacturer($userdata[$i]["manufacturer"], $lang);									
+					if($userdata[$i]["weight"] == ''){
+						$userdata[$i]["weight"] = 0;
+					}
+					
+					//Update Products Table					
+					$query = "update ".PRODUCTS." set products_quantity = ".$userdata[$i]["quantity"]."
+					, manufacturers_id = ".$mnfid."
+					, products_price = ".$userdata[$i]["price"]."
+					, products_cost = ".$userdata[$i]["cost"]."
+					, products_weight = '".$userdata[$i]["weight"]."'
+					, products_status = ".$userdata[$i]["status"];
+					
+					if($msrpUpdate == 'yes')
+						$query .= " ,products_msrp=".$userdata[$i]["v_products_msrp"];
+					$query .= " ,products_last_modified = CURRENT_TIMESTAMP where products_id = ".$update_pid;
+					mysql_query($query);	
+					
+					//get Product Url
+					$productURL = getProductKeyword($userdata[$i]["name"], $update_pid);
+					
+					//Update Products_descriptions
+					$query = "update ".PRODUCTS_DESCRIPTION." set products_name = '".$userdata[$i]["name"]."'
+					, products_description = '".$userdata[$i]["description"]."' , products_keyword = '".$productURL."' where products_id = ".$update_pid;
+					mysql_query($query);
+					
+					// map manufacture					
+					$query = "update ".PRODUCT_ATTRIBUTES." set value = ".$mnfid." where id = 2 and products_id = ".$update_pid;
+					mysql_query($query);	
+					
+					//Update image
+					$query = "update ".PRODUCTS_IMAGES." set image = '".$image."' where products_id = ".$update_pid;
+					mysql_query($query);
+					
+					//Category Mapping
+					categoryLookup($cat1, $cat2, $cat3, $update_pid, $lang);
+				}else{					
+					$query = "update ".PRODUCTS." set products_quantity = ".$userdata[$i]["quantity"]."
+					, products_price = ".$userdata[$i]["price"]."
+					, products_cost = ".$userdata[$i]["cost"]."
+					, products_status = ".$userdata[$i]["status"];
+					
+					if($msrpUpdate == 'yes')
+						$query .= " ,products_msrp=".$userdata[$i]["v_products_msrp"];
+					$query .= " ,products_last_modified = CURRENT_TIMESTAMP where products_id = ".$update_pid;
+					mysql_query($query);	
+					
+						
+					if($image != ""){
+						$query = "update ".PRODUCTS_IMAGES." set image = '".$image."' where products_id = ".$update_pid;
+						mysql_query($query);
+					}
+				}
+			}else{
+				//New product section
+				$xmlstr.="<v_status>NEW</v_status>\n";
+				if($manfInTitle == 'yes'){
+					if($userdata[$i]["manufacturer"] != '')
+						$userdata[$i]["name"] = $userdata[$i]["manufacturer"]." - ". $userdata[$i]["name"];
+				}
+				
+				if($userdata[$i]["weight"] == ''){
+					$userdata[$i]["weight"] = 0;
+				}
+					
+				$mnfid = 0;
+				if($userdata[$i]["manufacturer"] != '')
+					$mnfid = getManufacturer($userdata[$i]["manufacturer"], $lang);	
+				
+				//Insert products details
+				$msrp = 0;
+				if($msrpUpdate == 'yes')
+					$msrp = $userdata[$i]["v_products_msrp"];
+				$query = "insert into ".PRODUCTS."(parent_id, products_quantity, products_price, products_cost, products_msrp, products_model, products_sku, products_date_added, products_last_modified, products_weight, products_weight_class, products_status, products_tax_class_id, manufacturers_id) values(0, ".$userdata[$i]["quantity"].",".$userdata[$i]["price"].", ".$userdata[$i]["cost"].", ".$msrp.", '".$userdata[$i]["sku"]."', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '".$userdata[$i]["weight"]."',4,".$userdata[$i]["status"].", ".$userdata[$i]["tax_class_id"].", ".$mnfid.")";
+				mysql_query($query);
+				
+				$product_id = mysql_insert_id();
+				
+				$productURL = getProductKeyword($userdata[$i]["name"], $product_id);
+				
+				//Insert product title and descriptions
+				$query = "insert into ".PRODUCTS_DESCRIPTION." (products_id, language_id, products_name, products_description , products_keyword, products_tags, products_url) values(".$product_id.", ".$lang.", '".$userdata[$i]["name"]."','".$userdata[$i]["description"]."','".$productURL."', '', '')";
+				mysql_query($query);
+				
+				// map manufacture
+				$query = "insert into ".PRODUCT_ATTRIBUTES." (id, products_id, languages_id, value) values (2, ".$product_id.", ".$lang.", ".$mnfid.")";
+				mysql_query($query);
+				
+				//Insert Image
+				$query = "insert into ".PRODUCTS_IMAGES." (products_id, image, default_flag, sort_order, date_added) values(".$product_id.", '".$image."', 1, 0, CURRENT_TIMESTAMP)";
+				mysql_query($query);
+			}
+			
+			if($product_id > 0){
+				//Category Mapping
+				categoryLookup($cat1, $cat2, $cat3, $product_id, $lang);
+			}
+		}
+		$xmlstr.="</xmlProductImport>";
+	}	
 	$xmlstr.="</xmlProductsImportResponse>\n</xmlPopulate>";
 	output_xml($xmlstr);
 }
 
-function walk( $items ) {
-	global $filelayout, $filelayout_count, $modelsize;
-	global $langcode, $default_these;
-    global $epdlanguage_id, $v_products_id1;
-	global $separator, $max_categories ;
-	global $AllowedTags;
-	global $xmlstr;
-	global $tax_id;
-	global $date;
-	$date = date('Y-m-d H:i:s');
+function getManufacturer($manufacturer, $languageId){
+	$manufacturerid = -1;
+	$query = "select manufacturers_id from ".MANUFACTURERS." where manufacturers_name = '".$manufacturer."'";
+	$result = mysql_query($query);
+	if(mysql_num_rows($result)==0){
+		$query = "insert into ".MANUFACTURERS." (manufacturers_name, manufacturers_image, date_added, last_modified) values ('".$manufacturer."', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
+		mysql_query($query);
+		$query = "select max(manufacturers_id) from ".MANUFACTURERS;
+		$result = mysql_query($query);
+		$manufacturerid = mysql_result($result, 0);	
+		$query = "insert into ".MANUFACTURERS_INFO." (manufacturers_id, languages_id, manufacturers_url, url_clicked) values (".$manufacturerid.",".$languageId.", '', 0)";
+		mysql_query($query);
+	}else
+		$manufacturerid = mysql_result($result, 0);
+	return $manufacturerid;	
+}
+function getProductKeyword($pname ,$pid){
+	$post_name = trim(strtolower(str_replace('&reg;',' ',(trim($pname)."-".$pid))));
+	$post_name = trim(strtolower(str_replace('&quot;',' ',trim($post_name))));
+	$post_name = trim(strtolower(str_replace('&',' ',trim($post_name))));
+	$post_name = trim(strtolower(str_replace('\'','',$post_name)));
+	$post_name = trim(strtolower(str_replace('/',' ',$post_name)));
+	$post_name = trim(strtolower(str_replace('"','',$post_name)));
+	$post_name = trim(strtolower(str_replace('+','',$post_name)));
+	$post_name = trim(strtolower(str_replace('(','',$post_name)));
+	$post_name = trim(strtolower(str_replace(')','',$post_name)));
+	$post_name = trim(strtolower(str_replace('   ','-',$post_name)));
+	$post_name = trim(strtolower(str_replace('  ','-',$post_name)));
+	$post_name = trim(strtolower(str_replace(' ','-',$post_name)));
+	$post_name = trim(strtolower(str_replace('- -','-',$post_name)));
+	$post_name = trim(strtolower(str_replace('---','-',$post_name)));
+	$post_name = trim(strtolower(str_replace('--','-',$post_name)));
+	$post_name = trim(strtolower(str_replace('--','-',$post_name)));
+	$post_name = trim(strtolower(str_replace('- -','-',$post_name)));
+	$post_name = trim(strtolower(str_replace('.','',$post_name)));
+	$post_name = trim(strtolower(str_replace(',','',$post_name)));
+	$post_name = trim(strtolower(str_replace(' ','',$post_name)));
+	return $post_name;
+}	
 	
-	$xmlstr.="<xmlProductImport>";
-	
-	$totalTags = count($items);
-	
-	// make sure all non-set things are set to '';
-	// and strip the quotes from the start and end of the stings.
-	// escape any special chars for the database.
-	foreach( $filelayout as $key=> $value){
-		$i = $filelayout[$key];
-		if (isset($items[$i]) == false) {
-			$items[$i]='';
-		} else {
-			$items[$i] = $items[$i];
-			// Check to see if either of the magic_quotes are turned on or off;
-			// And apply filtering accordingly.
-			if (function_exists('ini_get')) {
-				//echo "Getting ready to check magic quotes<br>";
-				if (ini_get('magic_quotes_runtime') == 1){
-					// The magic_quotes_runtime are on, so lets account for them
-					// now any remaining doubled double quotes should be converted to one doublequote
-					$items[$i] = str_replace('"',"\"",$items[$i]);
-					$items[$i] = str_replace('\"\"',"\"",$items[$i]);
-
-					// now replace all singlequoates into doubled singlequates for database
-					$items[$i] = str_replace("\'","''",$items[$i]);
-				} else { // no magic_quotes are on
-					// now any remaining doubled double quotes should be converted to one doublequote
-					$items[$i] = str_replace('""',"\"",$items[$i]);
-					// now replace all singlequoates into doubled singlequates for database
-					$items[$i] = str_replace("\'","'",$items[$i]);
-					$items[$i] = str_replace("'","''",$items[$i]);
-				}
-			}
-		}
-	}
-	
-	// this is an important loop.  What it does is go thru all the fields in the incoming file and set the internal vars.
-	// Internal vars not set here are either set in the loop above for existing records, or not set at all (null values)
-	// the array values are handled separatly, although they will set variables in this loop, we won't use them.
-	foreach( $filelayout as $key => $value ){
-		$$key = $items[ $value ];
-		//echo $$key;
-	}
-	
-	if (strlen($v_products_model) > $modelsize ){
-		echo "<font color='red'>" . strlen($v_products_model) . $v_products_model . "... ERROR! - Too many characters in the model number.<br>
-		12 is the maximum on a standard OSC install.<br>
-		Your maximum product_model length is set to $modelsize<br>
-		You can either shorten your model numbers or increase the size of the field in the database.</font>";
-		die();
-	}
-
-	if ($v_products_model != "") {
-		//Comment below line if client want MSRP module on his store
-		$v_products_msrp = $v_products_price;
-		
-		//products_model exists!
-		$xmlstr.="  <v_products_model>".$v_products_model."</v_products_model>\n";
-	
-		$selectSkus = "SELECT products_id FROM ".PRODUCTS." where products_model = '".$v_products_model."'";
-		$resultSku = mysql_query($selectSkus);
-		$products_id_image = 0;
-		if($totalTags > 9){
-			if ($resultSku == "" || mysql_num_rows($resultSku) == 0){
-				//New product section
-				$xmlstr.="<v_status>NEW</v_status>\n";
-				/*
-				//Get product ID
-				$sql = "SHOW TABLE STATUS LIKE '".PRODUCTS."' ";
-				$result = mysql_query($sql);
-				$row =  mysql_fetch_array($result);
-				$max_products_id = $row['Auto_increment'];
-				if (!is_numeric($max_products_id) ){
-					$max_products_id=1;
-				}
-				$productid = $max_products_id;
-				$products_id_image = $productid; */
-				// insert product details
-				$query = "INSERT INTO ".PRODUCTS." (`products_model`, `products_weight`, `products_weight_class`,
-				 `products_price`, `products_quantity`, `products_date_added`, `products_last_modified`, `products_status`,
-				 `products_tax_class_id`, `has_children`) VALUES
-				('".$v_products_model."','".$v_products_weight."', 4,
-				 '".$v_products_msrp."', ".$v_products_quantity.", now(), now(), 1, 1, 0)";
-				$myresult = mysql_query($query);
-				$productid = mysql_insert_id();
-				$products_id_image = $productid;
-				$product_name = $v_products_name_1;
-				$product_url = $name = str_replace(' ', '_', $product_name);
-				$product_url = strtolower($product_url);
-
-				if($v_manufacturers_name != "")
-					$product_name = $v_manufacturers_name." - ".$v_products_name_1;
-				$products_keyword = $product_url."_".$v_products_model;
-				$query = "INSERT INTO ".PRODUCTS_DESCRIPTIONS." (`products_id`, `language_id`, `products_name`, 
-				`products_description`, `products_keyword`, `products_tags`, `products_url`,
-				`products_meta_title`, `products_meta_keywords`, `products_meta_description`) VALUES
-				(".$productid.", 1, '".$product_name."', 
-				'".$v_products_description_1."', '".$products_keyword."', '', '".$product_url."',
-				'".$product_name."', '".$product_name."', '".$v_products_description_short."')";
-				//echo "<br/><br/>".$query;
-			
-				$myresult = mysql_query($query);
-			
-				//Get priceID
-/*				$sql = "SHOW TABLE STATUS LIKE '".PRODUCTS_PRICES."' ";
-				$result = mysql_query($sql);
-				$row =  mysql_fetch_array($result);
-				$max_priceid = $row['Auto_increment'];
-				if (!is_numeric($max_priceid) ){
-					$max_priceid=1;
-				}
-				$priceid = $max_priceid; */
-				//insert product pricing details
-//				$query = "INSERT INTO ".PRODUCTS_PRICES." (`products_id`,`price`, `percentage_discount`, `lower_limit`, `usergroup_id`) VALUES
-//					(".$productid.",".$v_products_price.", 0, 1, 0)";
-				//echo "<br/><br/>".$query;
-//				mysql_query($query);
-
-				//Create Product Category Mapping
-				categoryLookup(trim($v_categories_name_1),trim($v_categories_name_2),trim($v_categories_name_3),$productid);
-			} else {
-				$rowSku =  mysql_fetch_array($resultSku);
-				$update_pid = $rowSku['products_id'];
-				$products_id_image = $update_pid;
-				
-				$xmlstr.=" <v_status>UPDATE</v_status>\n";
-
-				$query = "update ".PRODUCTS." 
-				set products_quantity = ".$v_products_quantity.", products_price = '".$v_products_msrp."', 
-				products_tax_class_id = 1 where products_id = ".$update_pid." ";
-				//echo "<br/><br/>".$query; 
-				mysql_query($query);
-				
-				$product_name = $v_products_name_1;
-				if($v_manufacturers_name != "")
-					$product_name = $v_manufacturers_name." - ".$v_products_name_1;
-				
-				$query = "update ".PRODUCTS_DESCRIPTIONS." 
-				set products_name = '".$product_name."', products_meta_description = '".$v_products_description_short."', 
-				products_description =  '".$v_products_description_1."' 
-				products_meta_title =  '".$product_name."' 
-				where products_id = ".$update_pid." ";
-				//echo "<br/><br/>".$query;
-				mysql_query($query);
-				
-//				$query = "update ".PRODUCTS_PRICES." set price = ".$v_products_price." where products_id = ".$update_pid." ";
-				//echo "<br/><br/>".$query;
-//				mysql_query($query);
-				
-				//Update Category Mapping
-				categoryLookup($v_categories_name_1,$v_categories_name_2,$v_categories_name_3,$update_pid);
-			}
-		}else{ // in case of Partial updates
-			$rowSku =  mysql_fetch_array($resultSku);
-			$update_pid = $rowSku['products_id'];
-			$products_id_image = $update_pid;
-			$xmlstr.=" <v_status>UPDATE</v_status>\n";
-			
-			//Update Product Attributs
-			$query = "update ".PRODUCTS." set products_quantity = ".$v_products_quantity.", products_price = '".$v_products_msrp."' where products_id = ".$update_pid." ";
-			//echo "<br/><br/>".$query; 
-			mysql_query($query);
-
-			//$query = "update ".PRODUCTS_PRICES." set price = ".$v_products_price." where products_id = ".$update_pid." ";
-			//echo "<br/><br/>".$query;
-			//mysql_query($query);
-		}// End of number of Tags IF condition
-		
-		//Download image to CS-Cart
-		if($v_products_image != "" && $products_id_image > 0){
-			$imageidP = 0;
-			$selectImage = "SELECT id FROM ".IMAGES." where products_id = '".$products_id_image."'";
-			$imageID_result = mysql_query($selectImage);
-			if ($imageID_result == "" || mysql_num_rows($imageID_result)==0){
-				//Get imageidP
-				$sql = "SHOW TABLE STATUS LIKE '".IMAGES."' ";
-				$result = mysql_query($sql);
-				$row =  mysql_fetch_array($result);
-				$max_imageidP = $row['Auto_increment'];
-				if (!is_numeric($max_imageidP) ){
-					$max_imageidP=1;
-				}
-				$imageidP = $max_imageidP;
-				$query = "INSERT INTO ".IMAGES." (`id`, `products_id`, `image`, `default_flag`, `sort_order`, `date_added`) VALUES
-				(".$imageidP.", ".$productid.", '".basename($v_products_image)."', 1, 0, , now())";
-				//echo "<br/><br/>".$query;
-				mysql_query($query);
-
-				//$query = "INSERT INTO ".IMAGES_LINKS." (`image_id`, `object_id`, `object_type`, `type`, `detailed_id`) VALUES
-				//(".$imageidP.", ".$productid.", 'product', 'M',".$imageidP.")";
-				//echo "<br/><br/>".$query;
-				//mysql_query($query);
-			}else{
-				$row =  mysql_fetch_array($imageID_result);
-				$imageidP = $row['id'];
-				$query = "update ".IMAGES." set image = '".basename($v_products_image)."' where id = ".$imageidP." ";
-				//echo "<br/><br/>".$query;
-				mysql_query($query);
-			}
-			
-			$imageDir = $imageidP;
-			if(strlen($imageidP) > 3)
-				$imageDir = substr($imageidP, 0, -3);
-
-			$thumbnanilsPath = "images/products/thumbnails/???/";
-			$product_infoPath = "images/products/product_info/???/";
-			$popupPath = "images/products/popup/???/";
-			$originalsPath = "images/products/originals/???/";
-			$miniPath = "images/products/mini/???/";
-			$largePath = "images/products/large/???/";
-			
-			$thumbnanilsPath = str_replace("???", $imageDir, $thumbnanilsPath);
-			$product_infoPath = str_replace("???", $imageDir, $product_infoPath);
-			$popupPath = str_replace("???", $imageDir, $popupPath);
-			$originalsPath = str_replace("???", $imageDir, $originalsPath);
-			$miniPath = str_replace("???", $imageDir, $miniPath);
-			$largePath = str_replace("???", $imageDir, $largePath);
-			
-			$dirs = array_filter(glob('images/products/thumbnails/'.$imageDir.'/'), 'is_dir');
-			//print_r( $dirs);
-			$size = sizeof($dirs);
-			$lastDir = (int)$size - 1;
-			if($lastDir < 0){
-				$lastDir = 0;
-				mkdir('images/products/thumbnails/'.$imageDir.'/', 0777, true);
-				chmod('images/products/thumbnails/'.$imageDir.'/', 0777);
-				
-				mkdir('images/products/thumbnails/'.$imageDir.'/180/', 0777, true);
-				chmod('images/products/thumbnails/'.$imageDir.'/180/', 0777);
-			}
-
-			$dirs = array_filter(glob('images/products/product_info/'.$imageDir.'/'), 'is_dir');
-			//print_r( $dirs);
-			$size = sizeof($dirs);
-			$lastDir = (int)$size - 1;
-			if($lastDir < 0){
-				$lastDir = 0;
-				mkdir('images/products/product_info/'.$imageDir.'/', 0777, true);
-				chmod('images/products/product_info/'.$imageDir.'/', 0777);
-				
-				mkdir('images/products/product_info/'.$imageDir.'/180/', 0777, true);
-				chmod('images/products/product_info/'.$imageDir.'/180/', 0777);
-			}
-
-			$dirs = array_filter(glob('images/products/popup/'.$imageDir.'/'), 'is_dir');
-			//print_r( $dirs);
-			$size = sizeof($dirs);
-			$lastDir = (int)$size - 1;
-			if($lastDir < 0){
-				$lastDir = 0;
-				mkdir('images/products/popup/'.$imageDir.'/', 0777, true);
-				chmod('images/products/popup/'.$imageDir.'/', 0777);
-				
-				mkdir('images/products/popup/'.$imageDir.'/180/', 0777, true);
-				chmod('images/products/popup/'.$imageDir.'/180/', 0777);
-			}
-
-			$dirs = array_filter(glob('images/products/originals/'.$imageDir.'/'), 'is_dir');
-			//print_r( $dirs);
-			$size = sizeof($dirs);
-			$lastDir = (int)$size - 1;
-			if($lastDir < 0){
-				$lastDir = 0;
-				mkdir('images/products/originals/'.$imageDir.'/', 0777, true);
-				chmod('images/products/originals/'.$imageDir.'/', 0777);
-				
-				mkdir('images/products/originals/'.$imageDir.'/180/', 0777, true);
-				chmod('images/products/originals/'.$imageDir.'/180/', 0777);
-			}
-
-			$dirs = array_filter(glob('images/products/mini/'.$imageDir.'/'), 'is_dir');
-			//print_r( $dirs);
-			$size = sizeof($dirs);
-			$lastDir = (int)$size - 1;
-			if($lastDir < 0){
-				$lastDir = 0;
-				mkdir('images/products/mini/'.$imageDir.'/', 0777, true);
-				chmod('images/products/mini/'.$imageDir.'/', 0777);
-				
-				mkdir('images/products/mini/'.$imageDir.'/180/', 0777, true);
-				chmod('images/products/mini/'.$imageDir.'/180/', 0777);
-			}
-
-			$dirs = array_filter(glob('images/products/large/'.$imageDir.'/'), 'is_dir');
-			//print_r( $dirs);
-			$size = sizeof($dirs);
-			$lastDir = (int)$size - 1;
-			if($lastDir < 0){
-				$lastDir = 0;
-				mkdir('images/products/large/'.$imageDir.'/', 0777, true);
-				chmod('images/products/large/'.$imageDir.'/', 0777);
-				
-				mkdir('images/products/large/'.$imageDir.'/180/', 0777, true);
-				chmod('images/products/large/'.$imageDir.'/180/', 0777);
-			}
-
-			$location = $thumbnanilsPath.basename($v_products_image);
-			$file = file_get_contents($v_products_image);
-			file_put_contents($location,$file);
-			
-			$location = $product_infoPath.basename($v_products_image);
-			$file = file_get_contents($v_products_image);
-			file_put_contents($location,$file);
-			
-			$location = $popupPath.basename($v_products_image);
-			$file = file_get_contents($v_products_image);
-			file_put_contents($location,$file);
-			
-			$location = $originalsPath.basename($v_products_image);
-			$file = file_get_contents($v_products_image);
-			file_put_contents($location,$file);
-			
-			$location = $miniPath.basename($v_products_image);
-			$file = file_get_contents($v_products_image);
-			file_put_contents($location,$file);
-			
-			$location = $largePath.basename($v_products_image);
-			$file = file_get_contents($v_products_image);
-			file_put_contents($location,$file);
-		}
-	} else {
-		// this record was missing the product_model
-		$xmlstr.=" <v_status>Missing Model Number</v_status>\n";
-	}
-	$xmlstr.="</xmlProductImport>";
-// end of row insertion code
+// xml parser function
+function startElementHandler ($parser,$name,$attrib) {
+	global $state;
+	$state = $name;
+	global $tag ;
+	if($name==strtoupper("xmlproduct")) { @$usercount++; $tag = 0;}
+}
+// xml parser function
+function endElementHandler ($parser,$name) {
+	global $usercount;
+	global $userdata;
+	global $state;
+	global $tag;
+	$state='';
+	if($name==strtoupper("xmlproduct")) { 
+		$userdata[$usercount]["tag_count"] = $tag;
+		$usercount++;}
+}
+// xml parser function
+function characterDataHandler ($parser, $data) {
+	global $usercount;
+	global $userdata;
+	global $state;
+	global $tag;
+	if (!$state) {return;}
+	$data=@mysql_escape_string($data);
+	if ($state==strtoupper("v_products_model")) { $userdata[$usercount]["sku"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_price")) { $userdata[$usercount]["price"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_quantity")) { $userdata[$usercount]["quantity"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_msrp")) { $userdata[$usercount]["v_products_msrp"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_cost")) { $userdata[$usercount]["cost"] = $data; $tag++;}
+	if ($state==strtoupper("v_status")) { $userdata[$usercount]["status"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_image")) { $userdata[$usercount]["image"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_name_1")) { $userdata[$usercount]["name"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_description_1")) { $userdata[$usercount]["description"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_weight")) { $userdata[$usercount]["weight"] = $data; $tag++;}
+	if ($state==strtoupper("v_manufacturers_id")) {$userdata[$usercount]["v_manufacturers_id"] = $data; $tag++;}
+	if ($state==strtoupper("v_manufacturers_name")) {$userdata[$usercount]["manufacturer"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_upc")) {$userdata[$usercount]["v_products_upc"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_thumbnail")) {$userdata[$usercount]["small_image"] = $data; $tag++;}
+	if ($state==strtoupper("v_categories_name_1")) {$userdata[$usercount]["categories_1"] = $data; $tag++;}
+	if ($state==strtoupper("v_categories_name_2")) {$userdata[$usercount]["categories_2"] = $data; $tag++;}
+	if ($state==strtoupper("v_categories_name_3")) {$userdata[$usercount]["categories_3"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_length")) {$userdata[$usercount]["length"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_width")) {$userdata[$usercount]["width"] = $data; $tag++;}
+	if ($state==strtoupper("v_products_height")) {$userdata[$usercount]["height"] = $data; $tag++;}
+	if ($state==strtoupper("v_dropshipper_id")) {$userdata[$usercount]["v_dropshipper_id"] = $data; $tag++;}
+	if ($state==strtoupper("v_dropshipper_prefix")) {$userdata[$usercount]["v_dropshipper_prefix"] = $data; $tag++;}
+	if ($state==strtoupper("v_dropshipper_name")) {$userdata[$usercount]["v_dropshipper_name"] = $data; $tag++;}
 }
 
-//Categories			//Category Relation			//Product Category Relation
-function categoryLookup($categories_1, $categories_2, $categories_3, $products_id){
-	
+//Categories, Category Description	and Product Category Mapping
+function categoryLookup($categories_1, $categories_2, $categories_3, $product_id, $lang){
 	$categories_1_ID = 0;
 	$categories_2_ID = 0;
 	$categories_3_ID = 0;
 	
 	if($categories_1 != ""){
-		$query = "SELECT cat.categories_id FROM ".CATEGORIES." cat LEFT JOIN ".CATEGORIES_DESCRIPTION." des 
-		ON cat.categories_id = des.categories_id where des.categories_name = '".$categories_1."' and cat.parent_id = 0";
-		$result = mysql_query($query);
-		if($result == "" || mysql_num_rows($result)==0){
-			
-			$query = "INSERT INTO ".CATEGORIES." (`parent_id`, `sort_order`, `date_added`) VALUES (0, 10, now())";
-			//echo "<br/><br/>".$query;
+		$query = "SELECT cd.categories_id FROM ".CATEGORIES_DESCRIPTION." as cd, ".CATEGORIES." as c where c.categories_id = cd.categories_id and cd.categories_name = '".$categories_1 ."' and c.parent_id = 0";
+		$result = mysql_query($query);		
+		if(mysql_num_rows($result)==0){
+			$query = "insert into ".CATEGORIES." (categories_image, parent_id, categories_mode, categories_status, categories_visibility_nav, categories_visibility_box, date_added, last_modified,categories_custom_url) values('','0','category',1,1,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'')";
 			mysql_query($query);
 			$categories_1_ID = mysql_insert_id();
-			
-			$query = "INSERT INTO ".CATEGORIES_DESCRIPTION." (`categories_id`, `language_id`, `categories_name`) 
-			VALUES ( ".$categories_1_ID.", 1, '".$categories_1."')";
-			//echo $query;
+						
+			$query = "insert into ".CATEGORIES_DESCRIPTION." (categories_id, language_id, categories_name, categories_menu_name,categories_tags) values(".$categories_1_ID.",".$lang.", '".$categories_1."', '".$categories_1."', 'tags')";
 			mysql_query($query);
-			
-			//$query = "update ".CATEGORIES." set id_path = ".$categories_1_ID." where categories_id = ".$categories_1_ID." ";
-			//echo $query;
-			//mysql_query($query);
 		}else{
-			$categories_1_ID = @mysql_result($result, 0);
+			$categories_1_ID = mysql_result($result, 0);
 		}
 	}
-	
+
+
 	if($categories_2 != "" && $categories_1_ID > 0){
-		$query = "SELECT cat.categories_id FROM ".CATEGORIES." cat LEFT JOIN ".CATEGORIES_DESCRIPTION." des 
-		ON cat.categories_id = des.categories_id where des.categories_name = '".$categories_2."' and cat.parent_id = ".$categories_1_ID." ";
-		$result = mysql_query($query);
-		if($result == "" || mysql_num_rows($result)==0){
-			$query = "INSERT INTO ".CATEGORIES." ( `parent_id`, `sort_order`, `date_added`) VALUES (".$categories_1_ID.", 20, now())";
-			//echo "<br/><br/>".$query;
+		$query = "SELECT cd.categories_id FROM ".CATEGORIES_DESCRIPTION." as cd, ".CATEGORIES." as c where c.categories_id = cd.categories_id and cd.categories_name = '".$categories_2 ."' and c.parent_id = ".$categories_1_ID;
+		$result = mysql_query($query);		
+		if(mysql_num_rows($result)==0){
+			$query = "insert into ".CATEGORIES." (categories_image, parent_id, categories_mode, categories_status, categories_visibility_nav, categories_visibility_box, date_added, last_modified,categories_custom_url) values('',".$categories_1_ID.",'category',1,1,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'')";
 			mysql_query($query);
 			$categories_2_ID = mysql_insert_id();
 			
-			$query = "INSERT INTO ".CATEGORIES_DESCRIPTION." (`categories_id`, `language_id`, `categories_name`)  
-			VALUES ( ".$categories_2_ID.", 1, '".$categories_2."')";
-			//echo "<br/><br/>".$query;
+			$query = "insert into ".CATEGORIES_DESCRIPTION." (categories_id, language_id, categories_name, categories_menu_name,categories_tags) values(".$categories_2_ID.",".$lang.", '".$categories_2."', '".$categories_2."', 'tags')";
 			mysql_query($query);
-			
-			//create id path for this category
-			//$strPathVal = $categories_1_ID."/".$categories_2_ID;
-			//$query = "update ".CATEGORIES." set id_path = '".$strPathVal."' where categories_id = ".$categories_2_ID." ";
-			//mysql_query($query);
 		}else{
-			$categories_2_ID = @mysql_result($result, 0);
+			$categories_2_ID = mysql_result($result, 0);
 		}
 	}
-	
+
 	if($categories_3 != "" && $categories_2_ID > 0){
-		$query = "SELECT cat.categories_id FROM ".CATEGORIES." cat LEFT JOIN ".CATEGORIES_DESCRIPTION." des 
-		ON cat.categories_id = des.categories_id where des.categories_name = '".$categories_3."' and cat.parent_id = ".$categories_2_ID." ";
+		$query = "SELECT cd.categories_id FROM ".CATEGORIES_DESCRIPTION." as cd, ".CATEGORIES." as c where c.categories_id = cd.categories_id and cd.categories_name = '".$categories_3 ."' and c.parent_id = ".$categories_2_ID;
 		$result = mysql_query($query);
-		if($result == "" || mysql_num_rows($result)==0){
-			$query = "INSERT INTO ".CATEGORIES." ( `parent_id`, `sort_order`, `date_added`) VALUES (".$categories_2_ID.", 30, now())";
-			//echo "<br/><br/>".$query;
+		if(mysql_num_rows($result)==0){
+			$query = "insert into ".CATEGORIES." (categories_image, parent_id, categories_mode, categories_status, categories_visibility_nav, categories_visibility_box, date_added, last_modified,categories_custom_url) values('',".$categories_2_ID.",'category',1,1,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'')";
 			mysql_query($query);
 			$categories_3_ID = mysql_insert_id();
 			
-			$query = "INSERT INTO ".CATEGORIES_DESCRIPTION." (`categories_id`, `language_id`, `categories_name`) 
-			VALUES ( ".$categories_3_ID.", 1, '".$categories_3."')";
-			//echo "<br/><br/>".$query;
+			$query = "insert into ".CATEGORIES_DESCRIPTION." (categories_id, language_id, categories_name, categories_menu_name,categories_tags) values(".$categories_3_ID.",".$lang.", '".$categories_3."', '".$categories_3."', 'tags')";
 			mysql_query($query);
-			
-			//create id path for this category
-			//$strPathVal = $categories_2_ID."/".$categories_3_ID;
-			//$query = "update ".CATEGORIES." set id_path = '".$strPathVal."' where categories_id = ".$categories_2_ID." ";
-			//mysql_query($query);
 		}else{
-			$categories_3_ID = @mysql_result($result, 0);
+			$categories_3_ID = mysql_result($result, 0);
 		}
 	}
 	
-	//Product Category Relation
 	if($categories_1_ID > 0){
-		$query = "delete from ".PRODUCTS_CATEGORIES." where products_id = ".$products_id."";
+		$query = "delete from ".PRODUCTS_TO_CATEGORIES." where products_id = ".$product_id;
 		mysql_query($query);
-		
 		if($categories_3_ID > 0){
-			//get product count
-			//$query = "SELECT product_count as v_product_count FROM ".CATEGORIES." where categories_id = '".$categories_3_ID."' ";
-			//$result = mysql_query($query);
-			//$rowprod=mysql_fetch_array($result);
-			//$productCount = $rowprod['v_product_count'];
-			//increment product count
-			//$productCount++;
-			$query = "INSERT INTO ".PRODUCTS_CATEGORIES." (`categories_id`, `products_id`) VALUES (".$categories_3_ID.", ".$products_id.")";
-			//echo "<br/><br/>".$query;
+			$query = "INSERT INTO ".PRODUCTS_TO_CATEGORIES." (`categories_id`,`products_id`) VALUES (".$categories_3_ID.",".$product_id.")";
 			mysql_query($query);
-			//update product count
-			//$query = "update ".CATEGORIES." set product_count = '".$productCount."' where categories_id = ".$categories_3_ID." ";
+		}else if($categories_2_ID > 0){
+			$query = "INSERT INTO ".PRODUCTS_TO_CATEGORIES." (`categories_id`,`products_id`) VALUES (".$categories_2_ID.",".$product_id.")";
 			mysql_query($query);
-		} else if($categories_2_ID > 0){
-			//get product count
-			//$query = "SELECT product_count as v_product_count FROM ".CATEGORIES." where categories_id = '".$categories_2_ID."' ";
-			//$result = mysql_query($query);
-			//$rowprod=mysql_fetch_array($result);
-			//$productCount = $rowprod['v_product_count'];
-			//increment product count
-			//$productCount++;
-			$query = "INSERT INTO ".PRODUCTS_CATEGORIES." (`categories_id`, `products_id`) 
-				VALUES (".$categories_2_ID.", ".$products_id.")";
-			//echo "<br/><br/>".$query;
+		}else{
+			$query = "INSERT INTO ".PRODUCTS_TO_CATEGORIES." (`categories_id`,`products_id`) VALUES (".$categories_1_ID.",".$product_id.")";
 			mysql_query($query);
-			//update product count
-			//$query = "update ".CATEGORIES." set product_count = '".$productCount."' where categories_id = ".$categories_2_ID." ";
-			//mysql_query($query);
-		} else if($categories_1_ID > 0){
-			//get product count
-			//$query = "SELECT product_count as v_product_count FROM ".CATEGORIES." where categories_id = '".$categories_1_ID."' ";
-			//$result = mysql_query($query);
-			//$rowprod=mysql_fetch_array($result);
-			//$productCount = $rowprod['v_product_count'];
-			//increment product count
-			//$productCount++;
-			$query = "INSERT INTO ".PRODUCTS_CATEGORIES." (`categories_id`, `products_id`) VALUES (".$categories_1_ID.", ".$products_id.")";
-			//echo "<br/><br/>".$query;
-			mysql_query($query);
-			//update product count
-			//$query = "update ".CATEGORIES." set product_count = '".$strPathVal."' where categories_id = ".$categories_1_ID." ";
-			//mysql_query($query);
 		}
 	}
 }
+		
+mysql_close($dbhandle);
 ?>

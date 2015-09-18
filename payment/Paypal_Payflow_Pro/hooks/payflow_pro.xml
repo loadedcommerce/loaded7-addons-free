@@ -22,7 +22,8 @@
 
       
         $ppec = new lC_Payment_payflow_pro();
-        $_SESSION['PPEC_TOKEN'] = $ppec->setExpressCheckout(); 
+        $bml = isset($_GET['BML']) ? true : false;
+        $_SESSION['PPEC_TOKEN'] = $ppec->setExpressCheckout($bml); 
 
         if (!$_SESSION['PPEC_TOKEN']) {
           lc_redirect(lc_href_link(FILENAME_CHECKOUT, 'cart', 'SSL')); 

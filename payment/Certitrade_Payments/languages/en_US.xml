@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language>
+  <definitions>
+    <definition>
+      <key>addon_certitrade_payments_title</key>
+      <value><![CDATA[CertiTrade]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>addon_certitrade_payments_description</key>
+      <value><![CDATA[Accept Credit Card Payment by CertiTrade Card Management Payment module.]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>payment_certitrade_title</key>
+      <value><![CDATA[CertiTrade ]]></value>
+      <group>checkout</group>
+    </definition>       
+    <definition>
+      <key>payment_certitrade_method_title</key>
+      <value><![CDATA[CertiTrade]]></value>
+      <group>checkout</group>
+    </definition> 
+    <definition>
+      <key>payment_certitrade_method_blurb</key>
+      <value><![CDATA[<img src="addons/Certitrade_Payments/images/certitrade_small.png" alt="CertiTrade Card Management Payment module" style="vertical-align:middle;">]]></value>
+      <group>checkout</group>
+    </definition>     
+    <definition>   
+      <key>payment_certitrade_error_no_response</key>
+      <value><![CDATA[ERROR: There was no response from the Certitrade API server. Please try again.]]></value>
+      <group>checkout</group>
+    </definition> 
+    <definition>
+      <key>payment_certitrade_error_occurred</key>
+      <value><![CDATA[ERROR: %s. Please try again.]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>error_message_code_1</key>
+      <value><![CDATA[Declined by the bank]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>error_message_code_2</key>
+      <value><![CDATA[No contact with the bank]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>error_message_code_3</key>
+      <value><![CDATA[Other technical fault]]></value>
+      <group>checkout</group>
+    </definition>
+    <definition>
+      <key>error_message_code_4</key>
+      <value><![CDATA[Cancelled by the buyer]]></value>
+      <group>checkout</group>
+    </definition>
+  </definitions>
+</language>

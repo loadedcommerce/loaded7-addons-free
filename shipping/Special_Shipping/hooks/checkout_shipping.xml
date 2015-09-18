@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+  <id>After VQMOD-002, add localization code</id>
+  <version>1.0.0</version>
+  <vqmver>2.3.2</vqmver>
+  <author>loadedcommerce.com</author>
+  <file name="templates/l7p_spareparts_blue/content/checkout/checkout_shipping.php">
+    <operation info="After , add localization code">
+      <search position="after"><![CDATA[<h4 class = "loaded7_heading_h4"><?php echo $quotes['module']; ?></h4>]]></search>        
+      <add><![CDATA[
+	<p> <?php if($quotes['module'] == 'Special shipping' && ADDONS_SHIPPING_SPECIAL_SHIPPING_STATUS == '1' )
+						{
+						echo  '<div class="alert alert">' . ADDONS_SHIPPING_SPECIAL_SHIPPING_NOTE . '</div>' . "\n";
+						}
+					  ?> </p>
+      ]]></add>
+    </operation>
+	<operation info="Replace , add localization code">
+      <search position="replace"><![CDATA[echo $lC_Currencies->displayPrice($methods['cost'], $quotes['tax_class_id']);]]></search>        
+      <add><![CDATA[echo ($quotes['module'] != 'Special shipping')? $lC_Currencies->displayPrice($methods['cost'], $quotes['tax_class_id']) : '';]]></add>
+    </operation>
+	<operation info="After , add localization code">
+      <search position="after"><![CDATA[foreach ($lC_ShoppingCart->getOrderTotals() as $module) {]]></search>        
+      <add><![CDATA[
+		$special_shipping = explode(' ',$module['title']);
+		$found = $special_shipping[0];
+		
+		if($found == 'Special'){
+			$module['text'] = '-' ; 
+		}
+      ]]></add>
+    </operation>
+  </file>   
+</modification>

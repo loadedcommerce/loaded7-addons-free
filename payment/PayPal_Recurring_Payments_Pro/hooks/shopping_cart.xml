@@ -15,6 +15,18 @@
       } else { 
         if ((defined('ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_STATUS') && ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_STATUS == '1') && (defined('ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_EC_STATUS') && ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_EC_STATUS == 'On')) { 
           ?>
+          <?php
+            if(defined('ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_BML_OPTION') && ADDONS_PAYMENT_PAYPAL_RECURRING_PAYMENTS_PRO_BML_OPTION == 1) {
+            ?>
+          <div id="paypal-ec-button-container" style="float: right; margin:20px 20px 0px 0;border:0px solid red;width:150px;">
+            <div id="paypal-ec-button">            
+              <a href="<?php echo lc_href_link(FILENAME_CHECKOUT, 'shipping&ppec=process&BML&PPECRECURRINGPRO', 'SSL'); ?>"><img style="vertical-align: middle;" src="https://www.paypalobjects.com/webstatic/en_US/btn/btn_bml_SM.png"></a><br /><a href="https://www.securecheckout.billmelater.com/paycapture-content/fetch?hash=AU826TU8&content=/bmlweb/ppwpsiw.html"><img src="https://www.paypalobjects.com/webstatic/en_US/btn/btn_bml_text.png" /></a>
+              <span style="margin:20px 0px 0px 60px;">-OR-</span>
+            </div>
+          </div>
+          <?php
+            }
+          ?>
           <div id="paypal-ec-button-container" style="float: right; margin:20px 4px 0px 0;">
             <div id="paypal-ec-button">
               <a href="<?php echo lc_href_link(FILENAME_CHECKOUT, 'shipping&ppec=process&PPECRECURRINGPRO', 'SSL'); ?>"><img style="vertical-align: middle;" src="https://www.paypalobjects.com/en_US/i/btn/btn_xpressCheckout.gif"></a><br />
